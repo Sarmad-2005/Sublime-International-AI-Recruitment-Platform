@@ -4,3 +4,4 @@
  * own files (e.g. `auth.ts`, `candidate.ts`) and re-export them below.
  */
 export * from "./common";
+export * from "./auth.schemas";

@@ -23,6 +23,13 @@ export const USER_ROLES = {
 export type UserRole = (typeof USER_ROLES)[keyof typeof USER_ROLES];
 export const USER_ROLE_VALUES = Object.values(USER_ROLES) as UserRole[];
 
+/** Runtime type guard for the `UserRole` union (narrows `unknown` values). */
+export function isUserRole(value: unknown): value is UserRole {
+  return (
+    typeof value === "string" && (USER_ROLE_VALUES as string[]).includes(value)
+  );
+}
+
 export const USER_ROLE_LABELS: Record<UserRole, string> = {
   SUPER_ADMIN: "Super Admin",
   ADMIN: "Admin / Recruiter",
@@ -308,23 +315,52 @@ export const UPLOAD_LIMITS = {
 // ---------------------------------------------------------------------------
 export const ROUTES = {
   HOME: "/",
-  LOGIN: "/login",
-  REGISTER: "/register",
-  FORGOT_PASSWORD: "/forgot-password",
+
+  // Auth pages (grouped under /auth/*).
+  AUTH: "/auth",
+  LOGIN: "/auth/login",
+  REGISTER: "/auth/register",
+  FORGOT_PASSWORD: "/auth/forgot-password",
+  RESET_PASSWORD: "/auth/reset-password",
+  VERIFY_OTP: "/auth/verify-otp",
+
+  // Portal roots (one per role family).
   ADMIN: "/admin",
   CLIENT: "/client",
   CANDIDATE: "/candidate",
   MEDICAL: "/medical",
+
+  // Role landing dashboards.
+  ADMIN_DASHBOARD: "/admin/dashboard",
+  CLIENT_DASHBOARD: "/client/dashboard",
+  CANDIDATE_DASHBOARD: "/candidate/dashboard",
+  MEDICAL_DASHBOARD: "/medical/dashboard",
 } as const;
 
-/** Where each role lands after authentication. */
+/** Where each role lands after authentication (role dashboards). */
 export const ROLE_HOME_ROUTE: Record<UserRole, string> = {
-  SUPER_ADMIN: ROUTES.ADMIN,
-  ADMIN: ROUTES.ADMIN,
-  SAUDI_CLIENT: ROUTES.CLIENT,
-  CANDIDATE: ROUTES.CANDIDATE,
-  MEDICAL_OFFICER: ROUTES.MEDICAL,
+  SUPER_ADMIN: ROUTES.ADMIN_DASHBOARD,
+  ADMIN: ROUTES.ADMIN_DASHBOARD,
+  SAUDI_CLIENT: ROUTES.CLIENT_DASHBOARD,
+  CANDIDATE: ROUTES.CANDIDATE_DASHBOARD,
+  MEDICAL_OFFICER: ROUTES.MEDICAL_DASHBOARD,
 };
+
+/**
+ * Query-string key carrying the path a user was bounced from, so the login page
+ * can return them after authenticating: `/auth/login?redirect=/admin/...`.
+ */
+export const AUTH_REDIRECT_PARAM = "redirect";
+
+/**
+ * Request headers the middleware injects after resolving the session, so
+ * downstream Server Components, Route Handlers and Server Actions can read the
+ * caller's identity without re-decoding the session cookie.
+ */
+export const AUTH_HEADERS = {
+  USER_ID: "x-user-id",
+  USER_ROLE: "x-user-role",
+} as const;
 
 // ---------------------------------------------------------------------------
 // Misc

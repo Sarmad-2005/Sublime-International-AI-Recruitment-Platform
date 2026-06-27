@@ -46,13 +46,50 @@ export interface User extends BaseEntity {
   lastLoginAt: Date | null;
 }
 
-/** Minimal authenticated user resolved from the Supabase session. */
-export interface SessionUser {
+/**
+ * The SIORP `users` row joined with its role — returned by the auth service
+ * (`getCurrentUser`, `signIn`, `signUp`). The `id` is shared with the Supabase
+ * Auth user id. Server-side shape; `Date` fields are real `Date`s.
+ */
+export interface UserWithRole {
   id: string;
-  authId: string;
   email: string;
-  fullName: string;
+  phone: string | null;
   role: UserRole;
+  isEmailVerified: boolean;
+  isPhoneVerified: boolean;
+  lastLoginAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/** Uniform result returned by the auth service mutations. */
+export interface AuthResult {
+  success: boolean;
+  user: UserWithRole | null;
+  /** Plain-English message when `success` is `false`, else `null`. */
+  error: string | null;
+}
+
+/**
+ * Lightweight candidate profile surfaced in the auth/session context (e.g.
+ * `useCurrentCandidate`). The full BEOE profile lives in the candidate service.
+ * JSON-safe: no `Date` fields, so it survives the `/api/auth/me` round-trip.
+ */
+export interface CandidateProfileSummary {
+  id: string;
+  userId: string;
+  fullName: string;
+  primaryTrade: string;
+  secondaryTrade: string | null;
+  yearsOfExperience: number;
+  city: string;
+  profilePhotoUrl: string | null;
+}
+
+/** Response shape of `GET /api/auth/me`. */
+export interface MeResponse {
+  candidate: CandidateProfileSummary | null;
 }
 
 // ---------------------------------------------------------------------------

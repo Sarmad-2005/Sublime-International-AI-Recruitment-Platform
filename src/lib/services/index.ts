@@ -5,5 +5,8 @@
  * async functions that use the Prisma client from `@/lib/prisma`. Components
  * never query the DB directly; they call hooks, which call these services.
  * Re-export each service module here as it is added.
+ *
+ * Services are namespaced (`authService.signIn(...)`) to keep call sites
+ * self-documenting and avoid name collisions between domains.
  */
-export {};
+export * as authService from "./auth.service";
