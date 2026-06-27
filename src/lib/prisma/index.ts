@@ -1,38 +1,17 @@
-import "server-only";
-
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "@/generated/prisma/client";
-import { serverEnv } from "@/lib/env";
-
 /**
- * Prisma client singleton (Prisma 7 + driver adapter).
+ * Barrel export for the Prisma module.
  *
- * Prisma 7 no longer reads the connection URL from the schema; the runtime
- * client connects through a driver adapter. We use `@prisma/adapter-pg` against
- * the pooled Supabase `DATABASE_URL`.
+ * Import the server-only client and generated types/enums from one place:
  *
- * The instance is cached on `globalThis` in development so Next.js hot-reloads
- * don't exhaust the connection pool. All DB access must go through the service
- * layer in `@/lib/services` (Rule #5), which imports this client.
+ *   import { prisma, type User, UserRole } from "@/lib/prisma";
+ *
+ * `prisma` is server-only (it pulls in `server-only` via ./client), so this
+ * module must not be imported from client components. For enum/type values in
+ * the browser, import from `@/generated/prisma/enums` directly instead.
  */
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-};
+export { prisma } from "./client";
 
-function createPrismaClient(): PrismaClient {
-  const adapter = new PrismaPg({ connectionString: serverEnv.DATABASE_URL });
-
-  return new PrismaClient({
-    adapter,
-    log:
-      serverEnv.NODE_ENV === "development"
-        ? ["query", "warn", "error"]
-        : ["error"],
-  });
-}
-
-export const prisma: PrismaClient = globalForPrisma.prisma ?? createPrismaClient();
-
-if (serverEnv.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
-}
+// Re-exports model types, the `Prisma` namespace, the `PrismaClient` class, and
+// every generated enum (UserRole, JobStatus, …) — this generated entrypoint
+// already re-exports `./enums` internally.
+export * from "@/generated/prisma/client";

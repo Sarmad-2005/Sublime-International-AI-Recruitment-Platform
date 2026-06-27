@@ -1,7 +1,8 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
+// SIORP — Sublime International Overseas Recruitment Platform.
+// PostgreSQL (Supabase). Prisma 7 + driver adapter (see src/lib/prisma).
 
 generator client {
   provider = "prisma-client"
@@ -14,4 +15,804 @@ datasource db {
   // - The runtime client connects via a driver adapter (@prisma/adapter-pg),
   //   configured in src/lib/prisma/index.ts.
   provider = "postgresql"
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  SAUDI_CLIENT
+  CANDIDATE
+  MEDICAL_OFFICER
+
+  @@map("user_role")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+
+  @@map("gender")
+}
+
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+
+  @@map("marital_status")
+}
+
+enum EducationLevel {
+  NONE
+  PRIMARY
+  MIDDLE
+  MATRIC
+  INTERMEDIATE
+  DIPLOMA
+  BACHELORS
+  MASTERS
+  DOCTORATE
+
+  @@map("education_level")
+}
+
+enum JobStatus {
+  DRAFT
+  ACTIVE
+  CLOSED
+  FILLED
+
+  @@map("job_status")
+}
+
+/// Candidate's stage in the recruitment pipeline (SRS M3–M10).
+enum ApplicationStatus {
+  APPLIED
+  ASSESSMENT_PENDING
+  ASSESSMENT_PASSED
+  ASSESSMENT_FAILED
+  INTERVIEW_INVITED
+  INTERVIEW_IN_PROGRESS
+  INTERVIEW_COMPLETED
+  TIERED
+  IN_CLIENT_POOL
+  CLIENT_SHORTLISTED
+  LIVE_INTERVIEW_SCHEDULED
+  SELECTED
+  POST_SELECTION
+  DEPLOYED
+  REJECTED
+  WITHDRAWN
+
+  @@map("application_status")
+}
+
+enum QuestionType {
+  MCQ
+  MULTI_SELECT
+  SCENARIO
+  IMAGE_BASED
+
+  @@map("question_type")
+}
+
+enum AIInterviewQuestionType {
+  TECHNICAL
+  BEHAVIORAL
+  COMMUNICATION
+  MOTIVATION
+
+  @@map("ai_interview_question_type")
+}
+
+enum AIInterviewStatus {
+  INVITED
+  IN_PROGRESS
+  COMPLETED
+  EXPIRED
+
+  @@map("ai_interview_status")
+}
+
+enum CandidateTier {
+  DIAMOND
+  PLATINUM
+  GOLD
+  BRONZE
+  REJECTED
+  PENDING
+
+  @@map("candidate_tier")
+}
+
+enum ClientReviewStatus {
+  UNREVIEWED
+  INTERESTED
+  NOT_INTERESTED
+  SHORTLISTED_FOR_INTERVIEW
+
+  @@map("client_review_status")
+}
+
+enum LiveInterviewStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+
+  @@map("live_interview_status")
+}
+
+enum OfferLetterStatus {
+  PENDING
+  ISSUED
+  SENT
+  ACCEPTED
+  DECLINED
+
+  @@map("offer_letter_status")
+}
+
+/// GAMCA = Gulf medical pre-departure fitness check.
+enum GamcaStatus {
+  PENDING
+  SCHEDULED
+  PENDING_RESULT
+  FIT
+  UNFIT
+
+  @@map("gamca_status")
+}
+
+enum VisaStatus {
+  PENDING
+  APPLIED
+  PROCESSING
+  STAMPED
+  REJECTED
+
+  @@map("visa_status")
+}
+
+enum TicketArrangement {
+  PENDING
+  EMPLOYER_ARRANGED
+  COMPANY_ARRANGED
+  SELF_ARRANGED
+  ISSUED
+
+  @@map("ticket_arrangement")
+}
+
+enum BriefingStatus {
+  PENDING
+  SCHEDULED
+  COMPLETED
+
+  @@map("briefing_status")
+}
+
+enum ArrivalStatus {
+  PENDING
+  IN_TRANSIT
+  ARRIVED
+  CONFIRMED
+
+  @@map("arrival_status")
+}
+
+enum ProbationStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  PASSED
+  FAILED
+
+  @@map("probation_status")
+}
+
+/// All notification categories surfaced by SRS M11.
+enum NotificationType {
+  ACCOUNT_VERIFICATION
+  APPLICATION_RECEIVED
+  ASSESSMENT_INVITE
+  ASSESSMENT_RESULT
+  AI_INTERVIEW_INVITE
+  AI_INTERVIEW_REMINDER
+  TIER_ASSIGNED
+  CLIENT_SHORTLIST
+  LIVE_INTERVIEW_SCHEDULED
+  LIVE_INTERVIEW_REMINDER
+  SELECTION_CONFIRMED
+  OFFER_LETTER_ISSUED
+  GAMCA_UPDATE
+  VISA_UPDATE
+  TICKET_ISSUED
+  PRE_DEPARTURE_BRIEF
+  DEPARTURE_REMINDER
+  ARRIVAL_CONFIRMED
+  GENERAL_ANNOUNCEMENT
+  NEW_MESSAGE
+  SYSTEM_ALERT
+
+  @@map("notification_type")
+}
+
+// ============================================================================
+// CORE: USERS & PROFILES
+// ============================================================================
+
+model User {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  email           String    @unique
+  phone           String?   @unique
+  passwordHash    String    @map("password_hash")
+  role            UserRole
+  isEmailVerified Boolean   @default(false) @map("is_email_verified")
+  isPhoneVerified Boolean   @default(false) @map("is_phone_verified")
+  lastLoginAt     DateTime? @map("last_login_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // Profile (one-to-one — exactly one is populated based on `role`).
+  candidateProfile   CandidateProfile?
+  saudiClientProfile SaudiClientProfile?
+
+  // Activity / cross-cutting relations.
+  notifications    Notification[]
+  auditLogs        AuditLog[]
+  sentMessages     Message[]      @relation("SentMessages")
+  receivedMessages Message[]      @relation("ReceivedMessages")
+
+  // Admin actions performed by this user.
+  tierAssignments         CandidateTierRecord[]  @relation("TierAssignedBy")
+  scheduledLiveInterviews LiveInterviewSession[] @relation("LiveInterviewScheduledBy")
+  observedLiveInterviews  LiveInterviewSession[] @relation("LiveInterviewObserver")
+  postSelectionUpdates    PostSelectionRecord[]  @relation("PostSelectionUpdatedBy")
+
+  @@index([role])
+  @@map("users")
+}
+
+/// BEOE-compliant candidate identity & professional profile.
+model CandidateProfile {
+  id     String @id @default(uuid(7)) @db.Uuid
+  userId String @unique @map("user_id") @db.Uuid
+
+  // Personal identity (BEOE).
+  fullName      String         @map("full_name")
+  fatherName    String         @map("father_name")
+  cnic          String         @unique
+  dateOfBirth   DateTime       @map("date_of_birth") @db.Date
+  gender        Gender
+  nationality   String         @default("Pakistani")
+  maritalStatus MaritalStatus? @map("marital_status")
+  religion      String?
+
+  // Passport.
+  passportNumber     String?   @unique @map("passport_number")
+  passportIssueDate  DateTime? @map("passport_issue_date") @db.Date
+  passportExpiryDate DateTime? @map("passport_expiry_date") @db.Date
+  passportIssuePlace String?   @map("passport_issue_place")
+
+  // Address.
+  permanentAddress String  @map("permanent_address")
+  currentAddress   String? @map("current_address")
+  city             String
+  province         String?
+  country          String  @default("Pakistan")
+  postalCode       String? @map("postal_code")
+
+  // Education & trade.
+  educationLevel    EducationLevel @map("education_level")
+  primaryTrade      String         @map("primary_trade")
+  secondaryTrade    String?        @map("secondary_trade")
+  yearsOfExperience Int            @default(0) @map("years_of_experience")
+
+  // Media.
+  profilePhotoUrl String? @map("profile_photo_url")
+
+  // Emergency contact.
+  emergencyContactName     String? @map("emergency_contact_name")
+  emergencyContactRelation String? @map("emergency_contact_relation")
+  emergencyContactPhone    String? @map("emergency_contact_phone")
+  emergencyContactAddress  String? @map("emergency_contact_address")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations.
+  user                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applications        Application[]
+  assessmentAttempts  AssessmentAttempt[]
+  aiInterviewAttempts AIInterviewAttempt[]
+  tierRecords         CandidateTierRecord[]
+  postSelectionRecord PostSelectionRecord?
+
+  @@index([cnic])
+  @@index([passportNumber])
+  @@index([primaryTrade])
+  @@index([educationLevel])
+  @@map("candidate_profiles")
+}
+
+/// Saudi employer / client company that requests candidates.
+model SaudiClientProfile {
+  id               String   @id @default(uuid(7)) @db.Uuid
+  userId           String   @unique @map("user_id") @db.Uuid
+  companyName      String   @map("company_name")
+  companyRegNumber String?  @map("company_reg_number")
+  country          String   @default("Saudi Arabia")
+  city             String
+  address          String?
+  contactName      String   @map("contact_name")
+  designation      String?
+  contactPhone     String?  @map("contact_phone")
+  website          String?
+  logoUrl          String?  @map("logo_url")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // Relations.
+  user           User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobPosts       JobPost[]
+  candidatePool  SaudiClientCandidatePool[]
+  liveInterviews LiveInterviewSession[]
+
+  @@index([companyName])
+  @@map("saudi_client_profiles")
+}
+
+// ============================================================================
+// JOBS & APPLICATIONS (SRS M2–M3)
+// ============================================================================
+
+model JobPost {
+  id            String @id @default(uuid(7)) @db.Uuid
+  saudiClientId String @map("saudi_client_id") @db.Uuid
+
+  title       String
+  description String?
+  sector      String
+  trade       String?
+  country     String  @default("Saudi Arabia")
+  city        String?
+  vacancies   Int     @default(1)
+
+  // Monetary values are stored as integers (halalas — 1 SAR = 100 halalas).
+  salaryMin      Int?   @map("salary_min")
+  salaryMax      Int?   @map("salary_max")
+  salaryCurrency String @default("SAR") @map("salary_currency")
+
+  benefits               String?
+  requirements           String?
+  contractDurationMonths Int?      @map("contract_duration_months")
+  deadline               DateTime?
+  status                 JobStatus @default(DRAFT)
+  publishedAt            DateTime? @map("published_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations.
+  saudiClient     SaudiClientProfile @relation(fields: [saudiClientId], references: [id], onDelete: Cascade)
+  applications    Application[]
+  tradeAssessment TradeAssessment?
+  aiInterviewSet  AIInterviewSet?
+
+  @@index([saudiClientId])
+  @@index([status])
+  @@index([sector])
+  @@index([deadline])
+  @@map("job_posts")
+}
+
+model Application {
+  id          String            @id @default(uuid(7)) @db.Uuid
+  candidateId String            @map("candidate_id") @db.Uuid
+  jobPostId   String            @map("job_post_id") @db.Uuid
+  cvUrl       String?           @map("cv_url")
+  coverLetter String?           @map("cover_letter")
+  status      ApplicationStatus @default(APPLIED)
+  appliedAt   DateTime          @default(now()) @map("applied_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  // Relations.
+  candidate           CandidateProfile          @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  jobPost             JobPost                   @relation(fields: [jobPostId], references: [id], onDelete: Cascade)
+  assessmentAttempt   AssessmentAttempt?
+  aiInterviewAttempt  AIInterviewAttempt?
+  tierRecord          CandidateTierRecord?
+  clientPoolEntry     SaudiClientCandidatePool?
+  liveInterviews      LiveInterviewSession[]
+  postSelectionRecord PostSelectionRecord?
+
+  // A candidate may apply to a given job post only once.
+  @@unique([candidateId, jobPostId])
+  @@index([candidateId])
+  @@index([jobPostId])
+  @@index([status])
+  @@map("applications")
+}
+
+// ============================================================================
+// TRADE ASSESSMENT (SRS M4)
+// ============================================================================
+
+model TradeAssessment {
+  id                 String  @id @default(uuid(7)) @db.Uuid
+  jobPostId          String  @unique @map("job_post_id") @db.Uuid
+  title              String
+  description        String?
+  timeLimitMinutes   Int     @default(30) @map("time_limit_minutes")
+  passingScore       Int     @default(60) @map("passing_score")
+  totalQuestions     Int     @default(0) @map("total_questions")
+  allowRetake        Boolean @default(false) @map("allow_retake")
+  retakeCooldownDays Int     @default(0) @map("retake_cooldown_days")
+  randomizeQuestions Boolean @default(true) @map("randomize_questions")
+  randomizeAnswers   Boolean @default(true) @map("randomize_answers")
+  isActive           Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations.
+  jobPost   JobPost              @relation(fields: [jobPostId], references: [id], onDelete: Cascade)
+  questions AssessmentQuestion[]
+  attempts  AssessmentAttempt[]
+
+  @@index([jobPostId])
+  @@map("trade_assessments")
+}
+
+model AssessmentQuestion {
+  id             String       @id @default(uuid(7)) @db.Uuid
+  assessmentId   String       @map("assessment_id") @db.Uuid
+  type           QuestionType @default(MCQ)
+  questionText   String       @map("question_text")
+  imageUrl       String?      @map("image_url")
+  options        Json
+  correctAnswers Json         @map("correct_answers")
+  points         Int          @default(1)
+  orderIndex     Int          @default(0) @map("order_index")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations.
+  assessment TradeAssessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+
+  @@index([assessmentId])
+  @@map("assessment_questions")
+}
+
+model AssessmentAttempt {
+  id                String    @id @default(uuid(7)) @db.Uuid
+  applicationId     String    @unique @map("application_id") @db.Uuid
+  candidateId       String    @map("candidate_id") @db.Uuid
+  assessmentId      String    @map("assessment_id") @db.Uuid
+  startedAt         DateTime  @default(now()) @map("started_at")
+  submittedAt       DateTime? @map("submitted_at")
+  score             Float?
+  passed            Boolean   @default(false)
+  answers           Json?
+  flaggedSuspicious Boolean   @default(false) @map("flagged_suspicious")
+  tabSwitchCount    Int       @default(0) @map("tab_switch_count")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations.
+  application Application      @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  candidate   CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  assessment  TradeAssessment  @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+
+  @@index([candidateId])
+  @@index([assessmentId])
+  @@index([passed])
+  @@map("assessment_attempts")
+}
+
+// ============================================================================
+// AI INTERVIEW (SRS M5)
+// ============================================================================
+
+model AIInterviewSet {
+  id                       String  @id @default(uuid(7)) @db.Uuid
+  jobPostId                String  @unique @map("job_post_id") @db.Uuid
+  title                    String
+  description              String?
+  maxDurationMinutes       Int     @default(30) @map("max_duration_minutes")
+  questionTimeLimitSeconds Int     @default(90) @map("question_time_limit_seconds")
+  isActive                 Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations.
+  jobPost   JobPost               @relation(fields: [jobPostId], references: [id], onDelete: Cascade)
+  questions AIInterviewQuestion[]
+
+  @@index([jobPostId])
+  @@map("ai_interview_sets")
+}
+
+model AIInterviewQuestion {
+  id               String                  @id @default(uuid(7)) @db.Uuid
+  interviewSetId   String                  @map("interview_set_id") @db.Uuid
+  questionText     String                  @map("question_text")
+  questionType     AIInterviewQuestionType @map("question_type")
+  expectedKeywords Json                    @map("expected_keywords")
+  orderIndex       Int                     @default(0) @map("order_index")
+  maxTimeSeconds   Int                     @default(90) @map("max_time_seconds")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations.
+  interviewSet AIInterviewSet @relation(fields: [interviewSetId], references: [id], onDelete: Cascade)
+
+  @@index([interviewSetId])
+  @@map("ai_interview_questions")
+}
+
+model AIInterviewAttempt {
+  id                  String            @id @default(uuid(7)) @db.Uuid
+  applicationId       String            @unique @map("application_id") @db.Uuid
+  candidateId         String            @map("candidate_id") @db.Uuid
+  status              AIInterviewStatus @default(INVITED)
+  invitedAt           DateTime?         @map("invited_at")
+  startedAt           DateTime?         @map("started_at")
+  completedAt         DateTime?         @map("completed_at")
+  inviteLinkToken     String            @unique @map("invite_link_token")
+  inviteLinkExpiresAt DateTime?         @map("invite_link_expires_at")
+  recordingUrl        String?           @map("recording_url")
+
+  // Scored 0–100 by the AI evaluation pipeline.
+  technicalScore        Float?  @map("technical_score")
+  communicationScore    Float?  @map("communication_score")
+  behavioralScore       Float?  @map("behavioral_score")
+  confidenceScore       Float?  @map("confidence_score")
+  overallInterviewScore Float?  @map("overall_interview_score")
+  aiSummary             String? @map("ai_summary")
+  responses             Json?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations.
+  application Application      @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  candidate   CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  @@index([candidateId])
+  @@index([status])
+  @@index([inviteLinkToken])
+  @@map("ai_interview_attempts")
+}
+
+// ============================================================================
+// TIERING & CLIENT POOL (SRS M6–M7)
+// ============================================================================
+
+model CandidateTierRecord {
+  id                String        @id @default(uuid(7)) @db.Uuid
+  applicationId     String        @unique @map("application_id") @db.Uuid
+  candidateId       String        @map("candidate_id") @db.Uuid
+  assessmentScore   Float?        @map("assessment_score")
+  interviewScore    Float?        @map("interview_score")
+  assessmentWeight  Decimal       @default(0.35) @map("assessment_weight") @db.Decimal(4, 3)
+  interviewWeight   Decimal       @default(0.65) @map("interview_weight") @db.Decimal(4, 3)
+  finalScore        Float?        @map("final_score")
+  tier              CandidateTier @default(PENDING)
+  adminOverride     Boolean       @default(false) @map("admin_override")
+  adminOverrideNote String?       @map("admin_override_note")
+  assignedById      String?       @map("assigned_by") @db.Uuid
+  assignedAt        DateTime?     @map("assigned_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations.
+  application Application      @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  candidate   CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  assignedBy  User?            @relation("TierAssignedBy", fields: [assignedById], references: [id], onDelete: SetNull)
+
+  @@index([candidateId])
+  @@index([tier])
+  @@index([assignedById])
+  @@map("candidate_tier_records")
+}
+
+/// Junction: a candidate's application surfaced into a Saudi client's pool.
+model SaudiClientCandidatePool {
+  id            String             @id @default(uuid(7)) @db.Uuid
+  saudiClientId String             @map("saudi_client_id") @db.Uuid
+  applicationId String             @unique @map("application_id") @db.Uuid
+  clientStatus  ClientReviewStatus @default(UNREVIEWED) @map("client_status")
+  addedAt       DateTime           @default(now()) @map("added_at")
+  reviewedAt    DateTime?          @map("reviewed_at")
+
+  // Relations.
+  saudiClient SaudiClientProfile @relation(fields: [saudiClientId], references: [id], onDelete: Cascade)
+  application Application        @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@unique([saudiClientId, applicationId])
+  @@index([saudiClientId])
+  @@index([clientStatus])
+  @@map("saudi_client_candidate_pool")
+}
+
+// ============================================================================
+// LIVE INTERVIEW (SRS M8)
+// ============================================================================
+
+model LiveInterviewSession {
+  id                String              @id @default(uuid(7)) @db.Uuid
+  applicationId     String              @map("application_id") @db.Uuid
+  saudiClientId     String              @map("saudi_client_id") @db.Uuid
+  scheduledById     String?             @map("scheduled_by") @db.Uuid
+  scheduledAt       DateTime            @map("scheduled_at")
+  durationMinutes   Int                 @default(30) @map("duration_minutes")
+  roomToken         String              @unique @map("room_token")
+  status            LiveInterviewStatus @default(SCHEDULED)
+  recordingUrl      String?             @map("recording_url")
+  candidateJoinedAt DateTime?           @map("candidate_joined_at")
+  clientJoinedAt    DateTime?           @map("client_joined_at")
+  adminObserverId   String?             @map("admin_observer_id") @db.Uuid
+  notes             String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations.
+  application   Application        @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  saudiClient   SaudiClientProfile @relation(fields: [saudiClientId], references: [id], onDelete: Cascade)
+  scheduledBy   User?              @relation("LiveInterviewScheduledBy", fields: [scheduledById], references: [id], onDelete: SetNull)
+  adminObserver User?              @relation("LiveInterviewObserver", fields: [adminObserverId], references: [id], onDelete: SetNull)
+
+  @@index([applicationId])
+  @@index([saudiClientId])
+  @@index([scheduledById])
+  @@index([adminObserverId])
+  @@index([status])
+  @@index([scheduledAt])
+  @@map("live_interview_sessions")
+}
+
+// ============================================================================
+// POST-SELECTION DEPLOYMENT (SRS M9–M10)
+// ============================================================================
+
+model PostSelectionRecord {
+  id            String @id @default(uuid(7)) @db.Uuid
+  applicationId String @unique @map("application_id") @db.Uuid
+  candidateId   String @unique @map("candidate_id") @db.Uuid
+
+  // Offer letter.
+  offerLetterStatus OfferLetterStatus @default(PENDING) @map("offer_letter_status")
+  offerLetterUrl    String?           @map("offer_letter_url")
+
+  // GAMCA medical.
+  gamcaStatus    GamcaStatus @default(PENDING) @map("gamca_status")
+  gamcaDate      DateTime?   @map("gamca_date")
+  gamcaResultUrl String?     @map("gamca_result_url")
+
+  // Visa.
+  visaStatus    VisaStatus @default(PENDING) @map("visa_status")
+  visaStampDate DateTime?  @map("visa_stamp_date")
+  visaUrl       String?    @map("visa_url")
+
+  // Travel ticket.
+  ticketArrangement TicketArrangement @default(PENDING) @map("ticket_arrangement")
+  ticketIssuedDate  DateTime?         @map("ticket_issued_date")
+  ticketDocUrl      String?           @map("ticket_doc_url")
+
+  // Pre-departure briefing.
+  preDepartureBriefStatus BriefingStatus @default(PENDING) @map("pre_departure_brief_status")
+  preDepartureBriefDate   DateTime?      @map("pre_departure_brief_date")
+
+  // Departure & arrival.
+  departureDate        DateTime?     @map("departure_date")
+  actualDepartureDate  DateTime?     @map("actual_departure_date")
+  arrivalStatus        ArrivalStatus @default(PENDING) @map("arrival_status")
+  arrivalConfirmedDate DateTime?     @map("arrival_confirmed_date")
+
+  // Probation tracking.
+  probationStatus ProbationStatus @default(NOT_STARTED) @map("probation_status")
+
+  notes       String?
+  updatedById String? @map("updated_by") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations.
+  application Application      @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  candidate   CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  updatedBy   User?            @relation("PostSelectionUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([candidateId])
+  @@index([offerLetterStatus])
+  @@index([visaStatus])
+  @@index([arrivalStatus])
+  @@index([updatedById])
+  @@map("post_selection_records")
+}
+
+// ============================================================================
+// NOTIFICATIONS & MESSAGING (SRS M11)
+// ============================================================================
+
+model Notification {
+  id        String           @id @default(uuid(7)) @db.Uuid
+  userId    String           @map("user_id") @db.Uuid
+  type      NotificationType
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean          @default(false) @map("is_read")
+  createdAt DateTime         @default(now()) @map("created_at")
+  readAt    DateTime?        @map("read_at")
+
+  // Relations.
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([type])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+/// Direct messaging between Admin and Saudi Client (threaded).
+model Message {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  threadId   String    @map("thread_id") @db.Uuid
+  senderId   String    @map("sender_id") @db.Uuid
+  receiverId String    @map("receiver_id") @db.Uuid
+  content    String
+  isRead     Boolean   @default(false) @map("is_read")
+  sentAt     DateTime  @default(now()) @map("sent_at")
+  readAt     DateTime? @map("read_at")
+
+  // Relations.
+  sender   User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([threadId])
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([isRead])
+  @@map("messages")
+}
+
+// ============================================================================
+// AUDIT LOG (SRS M12 — compliance trail)
+// ============================================================================
+
+model AuditLog {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  userId     String?  @map("user_id") @db.Uuid
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String?  @map("entity_id")
+  oldValue   Json?    @map("old_value")
+  newValue   Json?    @map("new_value")
+  ipAddress  String?  @map("ip_address")
+  userAgent  String?  @map("user_agent")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations — keep the log even if the actor is later deleted.
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
 }
