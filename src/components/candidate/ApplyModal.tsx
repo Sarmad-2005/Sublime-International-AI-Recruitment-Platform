@@ -120,7 +120,9 @@ export function ApplyModal({
   const { createApplication, isSubmitting, error, reset } = useCreateApplication();
 
   const profileReady = profileComplete >= MIN_PROFILE_COMPLETION;
-  const contactVerified = contact.emailVerified && contact.phoneVerified;
+  // Phase 1: only email verification gates applying. Mobile (OTP) verification
+  // isn't wired up yet, so an unverified mobile is shown but doesn't block.
+  const contactVerified = contact.emailVerified;
 
   function handleOpenChange(next: boolean) {
     setOpen(next);
