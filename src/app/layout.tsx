@@ -27,8 +27,21 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      {/*
+        `suppressHydrationWarning`: browser extensions (Bitdefender, Grammarly,
+        password managers, …) inject attributes like `bis_register` /
+        `__processed_*` onto <html>/<body> before React hydrates, which would
+        otherwise trip a hydration-mismatch warning. This suppresses the warning
+        for these top-level elements only (not their children).
+      */}
+      <body
+        className="min-h-full flex flex-col"
+        suppressHydrationWarning
+      >
+        {children}
+      </body>
     </html>
   );
 }

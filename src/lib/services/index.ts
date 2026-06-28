@@ -11,3 +11,5 @@
  */
 export * as authService from "./auth.service";
 export * as candidateService from "./candidate.service";
+export * as jobService from "./job.service";
+export * as applicationService from "./application.service";

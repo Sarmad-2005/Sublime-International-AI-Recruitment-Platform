@@ -3,3 +3,5 @@
 // Re-export hooks as they are added.
 export * from "./useAuth";
 export * from "./useCandidate";
+export * from "./useJobs";
+export * from "./useApplications";

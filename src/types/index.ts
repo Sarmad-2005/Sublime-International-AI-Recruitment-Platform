@@ -390,3 +390,166 @@ export interface CandidateDashboardData {
   featuredJobs: FeaturedJob[];
   unreadNotifications: number;
 }
+
+// ---------------------------------------------------------------------------
+// Job board & job detail (SRS §3.2 M2 — candidate-facing reads)
+// ---------------------------------------------------------------------------
+
+/** One job card on the candidate Job Board. JSON-safe (dates as ISO strings). */
+export interface JobBoardItem {
+  id: string;
+  title: string;
+  companyName: string;
+  /** Raw sector enum value (label resolved client-side via JOB_SECTOR_LABELS). */
+  sector: string;
+  city: string | null;
+  country: string;
+  /** Salary in whole major units (SAR), already converted from halalas. */
+  salaryMin: number | null;
+  salaryMax: number | null;
+  salaryCurrency: string;
+  vacancies: number;
+  /** ISO timestamp or null. */
+  deadline: string | null;
+  /** ISO timestamp the job went live, or null. */
+  publishedAt: string | null;
+}
+
+/** Parsed, validated Job Board query (from URL searchParams). */
+export interface JobBoardQuery {
+  search: string | null;
+  sector: string | null;
+  country: string | null;
+  /** Minimum monthly salary (major units) the job must reach. */
+  salaryMin: number | null;
+  /** Only jobs published within the last N days (null = any time). */
+  postedWithinDays: number | null;
+  page: number;
+}
+
+/** Paginated Job Board payload returned by the service and `/api/jobs`. */
+export interface JobBoardResult {
+  items: JobBoardItem[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+  /** Distinct destination countries across all active jobs (filter facet). */
+  countries: string[];
+}
+
+/** Which standard benefits a job advertises (parsed from its benefits text). */
+export interface JobBenefitFlags {
+  accommodation: boolean;
+  medical: boolean;
+  transport: boolean;
+  food: boolean;
+}
+
+/** Full job detail for the candidate-facing job page. */
+export interface JobDetailDTO {
+  id: string;
+  title: string;
+  companyName: string;
+  sector: string;
+  description: string | null;
+  /** Free-text requirements/qualifications, split into bullet lines. */
+  requirements: string[];
+  /** Raw benefits text (verbatim) and the parsed standard-benefit flags. */
+  benefitsText: string | null;
+  benefitFlags: JobBenefitFlags;
+  city: string | null;
+  country: string;
+  vacancies: number;
+  salaryMin: number | null;
+  salaryMax: number | null;
+  salaryCurrency: string;
+  contractDurationMonths: number | null;
+  deadline: string | null;
+  publishedAt: string | null;
+  status: string;
+  /** True once the deadline has passed (applications closed). */
+  isExpired: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Applications (SRS §3.4 M3 — candidate-facing reads/writes)
+// ---------------------------------------------------------------------------
+
+/** A single application row for the "My Applications" list. */
+export interface ApplicationListItem {
+  id: string;
+  jobPostId: string;
+  jobTitle: string;
+  companyName: string;
+  city: string | null;
+  status: ApplicationStatus;
+  /** Assigned tier, or null while still PENDING/unscored. */
+  tier: CandidateTier | null;
+  /** ISO timestamp. */
+  appliedAt: string;
+}
+
+/** Stage-1 trade-assessment outcome on an application. */
+export interface ApplicationAssessmentResult {
+  score: number | null;
+  passed: boolean;
+  /** ISO timestamp the attempt was submitted, or null if not finished. */
+  submittedAt: string | null;
+}
+
+/** Stage-2 AI-interview outcome on an application. */
+export interface ApplicationInterviewResult {
+  overallScore: number | null;
+  tier: CandidateTier | null;
+  aiSummary: string | null;
+  /** ISO timestamp the interview completed, or null. */
+  completedAt: string | null;
+}
+
+/** One milestone in the post-selection deployment tracker. */
+export interface ApplicationPostSelectionMilestone {
+  stage: PostSelectionStage;
+  label: string;
+  /** Current status value for this milestone (or null if not started). */
+  status: string | null;
+  done: boolean;
+}
+
+/** Post-selection deployment progress for a selected candidate. */
+export interface ApplicationPostSelection {
+  milestones: ApplicationPostSelectionMilestone[];
+  /** 0–100 overall deployment progress. */
+  progress: number;
+}
+
+/** One entry in an application's history timeline. */
+export interface ApplicationTimelineItem {
+  id: string;
+  title: string;
+  description: string | null;
+  /** ISO timestamp, or null for an upcoming (not-yet-reached) step. */
+  date: string | null;
+  state: "done" | "current" | "upcoming";
+}
+
+/** Everything the application detail page renders. */
+export interface ApplicationDetailDTO {
+  id: string;
+  jobPostId: string;
+  jobTitle: string;
+  companyName: string;
+  sector: string;
+  city: string | null;
+  country: string;
+  status: ApplicationStatus;
+  cvUrl: string | null;
+  tier: CandidateTier | null;
+  finalScore: number | null;
+  /** ISO timestamp. */
+  appliedAt: string;
+  assessment: ApplicationAssessmentResult | null;
+  interview: ApplicationInterviewResult | null;
+  postSelection: ApplicationPostSelection | null;
+  timeline: ApplicationTimelineItem[];
+}

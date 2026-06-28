@@ -9,6 +9,7 @@ import {
   Briefcase,
   CheckCheck,
   ChevronLeft,
+  ClipboardList,
   LayoutDashboard,
   LogOut,
   UserRound,
@@ -43,7 +44,7 @@ interface CandidateShellProps {
 }
 
 interface NavItem {
-  key: "dashboard" | "jobs" | "profile";
+  key: "dashboard" | "jobs" | "applications" | "profile";
   href: string;
   icon: React.ComponentType<{ className?: string }>;
 }
@@ -51,6 +52,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { key: "dashboard", href: ROUTES.CANDIDATE_DASHBOARD, icon: LayoutDashboard },
   { key: "jobs", href: `${ROUTES.CANDIDATE}/jobs`, icon: Briefcase },
+  { key: "applications", href: `${ROUTES.CANDIDATE}/applications`, icon: ClipboardList },
   { key: "profile", href: `${ROUTES.CANDIDATE}/profile`, icon: UserRound },
 ];
 
