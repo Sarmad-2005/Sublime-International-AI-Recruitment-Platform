@@ -7,12 +7,19 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // The Prisma 7 client + pg driver adapter run on the Node.js runtime only.
   serverExternalPackages: ["@prisma/adapter-pg", "pg"],
-  // Uncomment and set your project ref to serve Supabase Storage images:
-  // images: {
-  //   remotePatterns: [
-  //     { protocol: "https", hostname: "*.supabase.co", pathname: "/storage/v1/object/public/**" },
-  //   ],
-  // },
+  images: {
+    remotePatterns: [
+      // uploadthing CDN (candidate profile photos, documents).
+      { protocol: "https", hostname: "*.ufs.sh", pathname: "/**" },
+      { protocol: "https", hostname: "utfs.io", pathname: "/**" },
+      // Supabase Storage (reserved for future use).
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+    ],
+  },
 };
 
 export default withNextIntl(nextConfig);

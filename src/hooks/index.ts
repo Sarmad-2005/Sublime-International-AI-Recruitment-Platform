@@ -2,3 +2,4 @@
 // Components call these hooks instead of holding business logic (Rule #4).
 // Re-export hooks as they are added.
 export * from "./useAuth";
+export * from "./useCandidate";

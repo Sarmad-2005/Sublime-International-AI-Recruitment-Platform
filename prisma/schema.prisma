@@ -314,8 +314,11 @@ model CandidateProfile {
   secondaryTrade    String?        @map("secondary_trade")
   yearsOfExperience Int            @default(0) @map("years_of_experience")
 
-  // Media.
-  profilePhotoUrl String? @map("profile_photo_url")
+  // Media / documents.
+  profilePhotoUrl String?   @map("profile_photo_url")
+  cvUrl           String?   @map("cv_url")
+  cvUploadedAt    DateTime? @map("cv_uploaded_at")
+  passportCopyUrl String?   @map("passport_copy_url")
 
   // Emergency contact.
   emergencyContactName     String? @map("emergency_contact_name")

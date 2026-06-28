@@ -87,6 +87,18 @@ export async function signUp(data: SignUpInput): Promise<AuthResult> {
     };
   }
 
+  // Supabase deliberately does NOT error when the email is already registered
+  // (to avoid leaking which emails exist). Instead it returns a user whose
+  // `identities` array is empty. Detect that and surface a clear message rather
+  // than letting the duplicate-email DB write blow up as a generic error.
+  if (Array.isArray(result.user.identities) && result.user.identities.length === 0) {
+    return {
+      success: false,
+      user: null,
+      error: "An account with this email already exists. Please sign in instead.",
+    };
+  }
+
   await syncUserToDatabase(result.user);
 
   const user = await prisma.user.findUnique({
@@ -179,6 +191,17 @@ export async function resetPassword(email: string): Promise<void> {
     redirectTo: appUrl(ROUTES.RESET_PASSWORD),
   });
   if (error) throw new Error(error.message);
+}
+
+/**
+ * Exchange a password-recovery `code` (PKCE flow) from the reset-link URL for a
+ * short-lived session, so `updatePassword` can run against it. Returns whether
+ * the exchange succeeded (an expired/used link yields `false`).
+ */
+export async function exchangeRecoveryCode(code: string): Promise<boolean> {
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  return !error;
 }
 
 /** Set a new password for the currently-authenticated (recovery) session. */

@@ -363,6 +363,169 @@ export const AUTH_HEADERS = {
 } as const;
 
 // ---------------------------------------------------------------------------
+// Candidate profile option labels — keyed by the generated Prisma enums so the
+// dropdowns, API and database all share one source of truth (SRS §3.3.1).
+// ---------------------------------------------------------------------------
+export const GENDER_OPTIONS = ["MALE", "FEMALE", "OTHER"] as const;
+export const GENDER_LABELS: Record<(typeof GENDER_OPTIONS)[number], string> = {
+  MALE: "Male",
+  FEMALE: "Female",
+  OTHER: "Other",
+};
+
+export const MARITAL_STATUS_OPTIONS = [
+  "SINGLE",
+  "MARRIED",
+  "DIVORCED",
+  "WIDOWED",
+] as const;
+export const MARITAL_STATUS_LABELS: Record<
+  (typeof MARITAL_STATUS_OPTIONS)[number],
+  string
+> = {
+  SINGLE: "Single",
+  MARRIED: "Married",
+  DIVORCED: "Divorced",
+  WIDOWED: "Widowed",
+};
+
+/** Ordered low → high, matching the Prisma `EducationLevel` enum. */
+export const EDUCATION_LEVEL_OPTIONS = [
+  "NONE",
+  "PRIMARY",
+  "MIDDLE",
+  "MATRIC",
+  "INTERMEDIATE",
+  "DIPLOMA",
+  "BACHELORS",
+  "MASTERS",
+  "DOCTORATE",
+] as const;
+export const EDUCATION_LEVEL_LABELS: Record<
+  (typeof EDUCATION_LEVEL_OPTIONS)[number],
+  string
+> = {
+  NONE: "No formal education",
+  PRIMARY: "Primary",
+  MIDDLE: "Middle",
+  MATRIC: "Matriculation",
+  INTERMEDIATE: "Intermediate",
+  DIPLOMA: "Diploma",
+  BACHELORS: "Bachelor's",
+  MASTERS: "Master's",
+  DOCTORATE: "Doctorate",
+};
+
+/** Common emergency-contact relations offered in the dropdown. */
+export const EMERGENCY_RELATIONS = [
+  "Father",
+  "Mother",
+  "Spouse",
+  "Brother",
+  "Sister",
+  "Son",
+  "Daughter",
+  "Guardian",
+  "Other",
+] as const;
+
+/** Common trades for the corridor — power the trade input datalists. */
+export const COMMON_TRADES = [
+  "Electrician",
+  "Plumber",
+  "Welder",
+  "Mason",
+  "Carpenter",
+  "Steel Fixer",
+  "Heavy Driver",
+  "Light Driver",
+  "Crane Operator",
+  "HVAC Technician",
+  "Auto Mechanic",
+  "Painter",
+  "Scaffolder",
+  "Caregiver",
+  "Nurse",
+  "Lab Technician",
+  "Chef / Cook",
+  "Housekeeping",
+  "Security Guard",
+  "IT Support",
+] as const;
+
+// ---------------------------------------------------------------------------
+// Candidate dashboard status buckets — collapse the detailed ApplicationStatus
+// pipeline into the five stages a candidate sees (SRS §3.7.1).
+// ---------------------------------------------------------------------------
+export const CANDIDATE_STATUS_BUCKETS = [
+  "APPLIED",
+  "ASSESSMENT_PENDING",
+  "INTERVIEW_PENDING",
+  "SHORTLISTED",
+  "SELECTED",
+] as const;
+
+export type CandidateStatusBucket = (typeof CANDIDATE_STATUS_BUCKETS)[number];
+
+export const CANDIDATE_STATUS_BUCKET_LABELS: Record<
+  CandidateStatusBucket,
+  string
+> = {
+  APPLIED: "Applied",
+  ASSESSMENT_PENDING: "Assessment Pending",
+  INTERVIEW_PENDING: "Interview Pending",
+  SHORTLISTED: "Shortlisted",
+  SELECTED: "Selected",
+};
+
+/**
+ * Map a detailed `ApplicationStatus` (the DB enum) to the candidate-facing
+ * bucket. Terminal states (REJECTED / WITHDRAWN / DEPLOYED) return `null` and
+ * are excluded from the active stat cards.
+ */
+export const APPLICATION_STATUS_TO_BUCKET: Record<
+  string,
+  CandidateStatusBucket | null
+> = {
+  APPLIED: "APPLIED",
+  ASSESSMENT_PENDING: "ASSESSMENT_PENDING",
+  ASSESSMENT_FAILED: "ASSESSMENT_PENDING",
+  ASSESSMENT_PASSED: "INTERVIEW_PENDING",
+  INTERVIEW_INVITED: "INTERVIEW_PENDING",
+  INTERVIEW_IN_PROGRESS: "INTERVIEW_PENDING",
+  INTERVIEW_COMPLETED: "INTERVIEW_PENDING",
+  TIERED: "SHORTLISTED",
+  IN_CLIENT_POOL: "SHORTLISTED",
+  CLIENT_SHORTLISTED: "SHORTLISTED",
+  LIVE_INTERVIEW_SCHEDULED: "SHORTLISTED",
+  SELECTED: "SELECTED",
+  POST_SELECTION: "SELECTED",
+  DEPLOYED: null,
+  REJECTED: null,
+  WITHDRAWN: null,
+};
+
+/** Plain-English labels for each detailed application status (timeline copy). */
+export const APPLICATION_STATUS_LABELS: Record<string, string> = {
+  APPLIED: "Application submitted",
+  ASSESSMENT_PENDING: "Assessment pending",
+  ASSESSMENT_PASSED: "Assessment passed",
+  ASSESSMENT_FAILED: "Assessment not passed",
+  INTERVIEW_INVITED: "Invited to AI interview",
+  INTERVIEW_IN_PROGRESS: "AI interview in progress",
+  INTERVIEW_COMPLETED: "AI interview completed",
+  TIERED: "Tier assigned",
+  IN_CLIENT_POOL: "Shared with employer",
+  CLIENT_SHORTLISTED: "Shortlisted by employer",
+  LIVE_INTERVIEW_SCHEDULED: "Live interview scheduled",
+  SELECTED: "Selected",
+  POST_SELECTION: "Deployment in progress",
+  DEPLOYED: "Deployed",
+  REJECTED: "Not selected",
+  WITHDRAWN: "Application withdrawn",
+};
+
+// ---------------------------------------------------------------------------
 // Misc
 // ---------------------------------------------------------------------------
 /** Primary labor corridor for Phase 1 (Pakistan → Saudi Arabia). */

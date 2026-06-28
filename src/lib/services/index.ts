@@ -10,3 +10,4 @@
  * self-documenting and avoid name collisions between domains.
  */
 export * as authService from "./auth.service";
+export * as candidateService from "./candidate.service";

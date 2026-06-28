@@ -230,3 +230,163 @@ export interface Paginated<T> {
   total: number;
   totalPages: number;
 }
+
+// ---------------------------------------------------------------------------
+// Candidate portal — profile DTO & dashboard (SRS §3.3, §3.7)
+// ---------------------------------------------------------------------------
+import type {
+  ApplicationStatus,
+  EducationLevel as PrismaEducationLevel,
+  Gender as PrismaGender,
+  MaritalStatus as PrismaMaritalStatus,
+} from "@/generated/prisma/enums";
+
+/**
+ * JSON-safe candidate profile returned by the candidate service and the
+ * `/api/candidate/profile` endpoint. All `Date` columns are serialised to
+ * `yyyy-MM-dd` strings so the payload survives the server → client boundary and
+ * binds directly to `<input type="date">`.
+ */
+export interface CandidateProfileDTO {
+  id: string;
+  userId: string;
+
+  // Personal identity (BEOE).
+  fullName: string;
+  fatherName: string;
+  cnic: string;
+  /** ISO date `yyyy-MM-dd`. */
+  dateOfBirth: string;
+  gender: PrismaGender;
+  nationality: string;
+  maritalStatus: PrismaMaritalStatus | null;
+  religion: string | null;
+
+  // Passport.
+  passportNumber: string | null;
+  passportIssueDate: string | null;
+  passportExpiryDate: string | null;
+  passportIssuePlace: string | null;
+
+  // Address.
+  permanentAddress: string;
+  currentAddress: string | null;
+  city: string;
+  province: string | null;
+  country: string;
+  postalCode: string | null;
+
+  // Education & trade.
+  educationLevel: PrismaEducationLevel;
+  primaryTrade: string;
+  secondaryTrade: string | null;
+  yearsOfExperience: number;
+
+  // Media / documents.
+  profilePhotoUrl: string | null;
+  cvUrl: string | null;
+  cvUploadedAt: string | null;
+  passportCopyUrl: string | null;
+
+  // Emergency contact.
+  emergencyContactName: string | null;
+  emergencyContactRelation: string | null;
+  emergencyContactPhone: string | null;
+  emergencyContactAddress: string | null;
+}
+
+/** A single section's completion state (used for per-tab progress). */
+export interface SectionCompletion {
+  /** 0–100, rounded. */
+  percentage: number;
+  /** Human-readable labels of the fields still missing in this section. */
+  missingFields: string[];
+}
+
+/** Per-section + overall profile completion, surfaced by the profile page. */
+export interface ProfileCompletion {
+  overall: number;
+  sections: {
+    personal: SectionCompletion;
+    documents: SectionCompletion;
+    education: SectionCompletion;
+  };
+  /** Flat list of every missing field across all sections. */
+  missingFields: string[];
+}
+
+/** The five candidate-facing pipeline buckets shown as dashboard stat cards. */
+export type CandidateStatusBucket =
+  | "APPLIED"
+  | "ASSESSMENT_PENDING"
+  | "INTERVIEW_PENDING"
+  | "SHORTLISTED"
+  | "SELECTED";
+
+/** One row in the candidate's recent-activity timeline. */
+export interface CandidateActivityItem {
+  id: string;
+  jobTitle: string;
+  status: ApplicationStatus;
+  /** ISO timestamp of the status change. */
+  occurredAt: string;
+}
+
+/** A candidate's application summarised for portal lists. */
+export interface CandidateApplicationSummary {
+  id: string;
+  jobPostId: string;
+  jobTitle: string;
+  companyName: string;
+  city: string | null;
+  status: ApplicationStatus;
+  /** ISO timestamp. */
+  appliedAt: string;
+}
+
+/** A featured job the candidate has not yet applied to. */
+export interface FeaturedJob {
+  id: string;
+  title: string;
+  companyName: string;
+  sector: string;
+  city: string | null;
+  country: string;
+  salaryMin: number | null;
+  salaryMax: number | null;
+  salaryCurrency: string;
+  vacancies: number;
+  /** ISO timestamp or null. */
+  deadline: string | null;
+}
+
+/** A notification surfaced in the candidate nav bell dropdown. */
+export interface NotificationDTO {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  link: string | null;
+  isRead: boolean;
+  /** ISO timestamp. */
+  createdAt: string;
+}
+
+/** Bell payload: recent notifications plus the unread badge count. */
+export interface NotificationFeed {
+  items: NotificationDTO[];
+  unreadCount: number;
+}
+
+/** Everything the candidate dashboard server component renders. */
+export interface CandidateDashboardData {
+  fullName: string;
+  profilePhotoUrl: string | null;
+  completion: ProfileCompletion;
+  /** Count of applications in each status bucket. */
+  statusCounts: Record<CandidateStatusBucket, number>;
+  totalApplications: number;
+  recentActivity: CandidateActivityItem[];
+  featuredJobs: FeaturedJob[];
+  unreadNotifications: number;
+}

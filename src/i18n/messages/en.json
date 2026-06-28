@@ -3,5 +3,242 @@
     "appName": "SIORP",
     "appFullName": "Sublime International Online Recruitment Platform",
     "tagline": "AI-powered overseas recruitment for the Pakistan → Saudi Arabia corridor"
+  },
+  "auth": {
+    "layout": {
+      "brand": "SUBLIME INTERNATIONAL",
+      "tagline": "AI-Powered Talent. Zero Borders.",
+      "description": "The smart way to connect Pakistan's skilled workforce with verified Saudi employers — assessed, interviewed and deployment-ready.",
+      "stats": {
+        "candidates": { "value": "12K+", "label": "Candidates onboarded" },
+        "employers": { "value": "450+", "label": "Saudi employers" },
+        "success": { "value": "98%", "label": "Visa success rate" }
+      },
+      "footer": "© 2026 Sublime International. Licensed overseas employment promoter."
+    },
+    "common": {
+      "genericError": "Something went wrong. Please try again.",
+      "backToLogin": "Back to sign in",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "or": "or"
+    },
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to continue to your dashboard.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "success": "Signed in successfully.",
+      "noAccount": "New to Sublime International?",
+      "registerLink": "Register as Candidate"
+    },
+    "register": {
+      "title": "Create your account",
+      "subtitle": "Register as a candidate to start your journey.",
+      "fullNameLabel": "Full name",
+      "fullNamePlaceholder": "As per your CNIC",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "phoneLabel": "Mobile number",
+      "phonePlaceholder": "03XX XXXXXXX",
+      "phoneHint": "Pakistani mobile in 03XX format.",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Create a password",
+      "confirmPasswordLabel": "Confirm password",
+      "confirmPasswordPlaceholder": "Re-enter your password",
+      "passwordHint": "At least 8 characters with an uppercase letter, a number and a special character.",
+      "continue": "Create account",
+      "creating": "Creating account…",
+      "createdToast": "Account created. Please sign in.",
+      "haveAccount": "Already have an account?",
+      "loginLink": "Sign in"
+    },
+    "forgot": {
+      "title": "Forgot password?",
+      "subtitle": "Enter your email and we'll send you a reset link.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "submit": "Send reset link",
+      "submitting": "Sending…",
+      "success": {
+        "title": "Check your email",
+        "body": "If an account exists for {email}, you'll receive a password reset link shortly.",
+        "resend": "Resend link",
+        "resentToast": "Reset link sent again."
+      }
+    },
+    "reset": {
+      "title": "Set a new password",
+      "subtitle": "Choose a strong password you haven't used before.",
+      "passwordLabel": "New password",
+      "passwordPlaceholder": "Enter a new password",
+      "confirmPasswordLabel": "Confirm new password",
+      "confirmPasswordPlaceholder": "Re-enter your new password",
+      "passwordHint": "At least 8 characters with an uppercase letter, a number and a special character.",
+      "submit": "Reset password",
+      "submitting": "Updating…",
+      "verifying": "Verifying your reset link…",
+      "invalid": {
+        "title": "Link expired or invalid",
+        "body": "This password reset link is no longer valid. Request a new one to continue.",
+        "requestNew": "Request a new link"
+      },
+      "success": {
+        "title": "Password updated",
+        "body": "Your password has been changed. You can now sign in with your new password.",
+        "toast": "Password updated successfully.",
+        "goToLogin": "Continue to sign in"
+      }
+    }
+  },
+  "candidate": {
+    "nav": {
+      "brand": "SIORP",
+      "dashboard": "Dashboard",
+      "jobs": "My Jobs",
+      "profile": "My Profile",
+      "notifications": "Notifications",
+      "noNotifications": "You're all caught up.",
+      "markAllRead": "Mark all as read",
+      "viewProfile": "View profile",
+      "signOut": "Sign out",
+      "openMenu": "Open menu",
+      "collapseSidebar": "Collapse sidebar",
+      "expandSidebar": "Expand sidebar",
+      "account": "Account"
+    },
+    "dashboard": {
+      "welcome": "Welcome back, {name}",
+      "welcomeFallback": "Welcome back",
+      "subtitle": "Here's where your applications stand today.",
+      "profileCompletion": "Profile completion",
+      "completeProfileTitle": "Complete your profile",
+      "completeProfileBody": "A complete profile gets you noticed by employers. You're {percent}% there.",
+      "completeProfileCta": "Complete profile",
+      "missingPrefix": "Still needed:",
+      "statusHeading": "Your applications",
+      "totalApplications": "{count, plural, =0 {No applications yet} one {# application} other {# applications}}",
+      "activityHeading": "Recent activity",
+      "noActivity": "No recent activity yet. Apply to a job to get started.",
+      "featuredHeading": "Jobs for you",
+      "featuredSubtitle": "Active roles you haven't applied to yet.",
+      "noFeatured": "No new jobs right now. Check back soon.",
+      "viewAllJobs": "View all jobs",
+      "applyNow": "Apply now",
+      "vacancies": "{count, plural, one {# vacancy} other {# vacancies}}",
+      "salaryNegotiable": "Salary negotiable",
+      "salaryRange": "{currency} {min} – {max}",
+      "deadline": "Apply by {date}"
+    },
+    "status": {
+      "APPLIED": "Applied",
+      "ASSESSMENT_PENDING": "Assessment Pending",
+      "INTERVIEW_PENDING": "Interview Pending",
+      "SHORTLISTED": "Shortlisted",
+      "SELECTED": "Selected"
+    },
+    "profile": {
+      "title": "My Profile",
+      "subtitle": "Keep your details up to date — employers see this information.",
+      "overallComplete": "{percent}% complete",
+      "tabs": {
+        "personal": "Personal Info",
+        "documents": "Documents",
+        "education": "Education & Skills"
+      },
+      "sectionComplete": "{percent}% complete",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "saved": "Changes saved.",
+      "saveError": "Couldn't save your changes. Please try again.",
+      "createFirstNotice": "Fill in and save your Personal Info first — your documents, education and skills unlock once your profile is created.",
+      "requiredNote": "Fields marked * are required.",
+      "personal": {
+        "identityHeading": "Identity",
+        "fullName": "Full name",
+        "fullNamePlaceholder": "As per your CNIC",
+        "fatherName": "Father's name",
+        "cnic": "CNIC",
+        "cnicPlaceholder": "12345-1234567-1",
+        "dateOfBirth": "Date of birth",
+        "gender": "Gender",
+        "genderPlaceholder": "Select gender",
+        "nationality": "Nationality",
+        "maritalStatus": "Marital status",
+        "maritalStatusPlaceholder": "Select status",
+        "religion": "Religion",
+        "passportHeading": "Passport",
+        "passportNumber": "Passport number",
+        "passportIssueDate": "Issue date",
+        "passportExpiryDate": "Expiry date",
+        "passportIssuePlace": "Place of issue",
+        "addressHeading": "Address",
+        "permanentAddress": "Permanent address",
+        "currentAddress": "Current address",
+        "city": "City",
+        "province": "Province",
+        "country": "Country",
+        "postalCode": "Postal code",
+        "emergencyHeading": "Emergency contact",
+        "emergencyName": "Contact name",
+        "emergencyRelation": "Relationship",
+        "emergencyRelationPlaceholder": "Select relationship",
+        "emergencyPhone": "Contact phone",
+        "emergencyPhonePlaceholder": "0300-1234567",
+        "emergencyAddress": "Contact address"
+      },
+      "documents": {
+        "photoHeading": "Profile photo",
+        "photoHint": "A clear, front-facing photo. Square, at least 300×300px.",
+        "cvHeading": "CV / Resume",
+        "cvHint": "PDF or DOCX, up to 5 MB.",
+        "passportHeading": "Passport copy",
+        "passportHint": "Scanned image or PDF of your passport's main page."
+      },
+      "education": {
+        "educationLevel": "Highest education level",
+        "educationLevelPlaceholder": "Select education level",
+        "primaryTrade": "Primary trade",
+        "primaryTradePlaceholder": "e.g. Electrician",
+        "secondaryTrade": "Secondary trade",
+        "secondaryTradePlaceholder": "Select a trade (optional)",
+        "secondaryTradeNone": "None",
+        "yearsOfExperience": "Years of experience"
+      }
+    },
+    "photo": {
+      "change": "Change photo",
+      "upload": "Upload photo",
+      "remove": "Remove",
+      "cropTitle": "Crop your photo",
+      "cropHint": "Drag to reposition. The photo is cropped to a square.",
+      "apply": "Apply & upload",
+      "cancel": "Cancel",
+      "uploading": "Uploading…",
+      "tooSmall": "Image must be at least 300×300 pixels.",
+      "invalidType": "Please choose a JPG or PNG image.",
+      "uploadError": "Upload failed. Please try again.",
+      "alt": "Profile photo"
+    },
+    "cv": {
+      "dropHere": "Drop your CV here, or click to browse",
+      "constraints": "PDF or DOCX · max 5 MB",
+      "uploading": "Uploading…",
+      "uploadedOn": "Uploaded {date}",
+      "replace": "Replace",
+      "remove": "Remove",
+      "view": "View",
+      "invalidType": "Only PDF or DOCX files are allowed.",
+      "tooLarge": "File is larger than 5 MB.",
+      "uploadError": "Upload failed. Please try again."
+    },
+    "guard": {
+      "checking": "Loading your portal…"
+    }
   }
 }
