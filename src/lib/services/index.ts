@@ -13,3 +13,6 @@ export * as authService from "./auth.service";
 export * as candidateService from "./candidate.service";
 export * as jobService from "./job.service";
 export * as applicationService from "./application.service";
+export * as assessmentService from "./assessment.service";
+export * as interviewService from "./interview.service";
+export * as tierService from "./tier.service";

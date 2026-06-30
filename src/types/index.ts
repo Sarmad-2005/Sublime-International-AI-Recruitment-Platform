@@ -4,6 +4,7 @@ import type {
   Currency,
   DestinationCountry,
   EducationLevel,
+  InterviewRecommendation,
   JobPostStatus,
   JobSector,
   PipelineStage,
@@ -239,6 +240,7 @@ import type {
   EducationLevel as PrismaEducationLevel,
   Gender as PrismaGender,
   MaritalStatus as PrismaMaritalStatus,
+  QuestionType,
 } from "@/generated/prisma/enums";
 
 /**
@@ -552,4 +554,249 @@ export interface ApplicationDetailDTO {
   interview: ApplicationInterviewResult | null;
   postSelection: ApplicationPostSelection | null;
   timeline: ApplicationTimelineItem[];
+}
+
+// ---------------------------------------------------------------------------
+// Trade Assessment — Stage 1 filter (SRS §3.4 M4)
+// ---------------------------------------------------------------------------
+
+/** One selectable answer option on a question (candidate-safe — no correctness). */
+export interface AssessmentOptionDTO {
+  id: string;
+  text: string;
+  imageUrl: string | null;
+}
+
+/**
+ * A single question as sent to the candidate's browser. Deliberately omits
+ * `correctAnswers` — scoring happens server-side only.
+ */
+export interface AssessmentQuestionDTO {
+  id: string;
+  type: QuestionType;
+  questionText: string;
+  imageUrl: string | null;
+  points: number;
+  options: AssessmentOptionDTO[];
+}
+
+/** Assessment configuration / rules shown on the instructions screen. */
+export interface AssessmentConfigDTO {
+  id: string;
+  title: string;
+  description: string | null;
+  timeLimitMinutes: number;
+  passingScore: number;
+  totalQuestions: number;
+  /** May the candidate navigate back to earlier questions? */
+  allowPrevious: boolean;
+  /** Auto-advance to the next question after an answer is selected? */
+  autoAdvance: boolean;
+  randomizeQuestions: boolean;
+  randomizeAnswers: boolean;
+  allowRetake: boolean;
+  retakeCooldownDays: number;
+}
+
+/** Retake availability for a failed assessment. */
+export interface RetakeStatus {
+  /** Whether retakes are permitted at all for this assessment. */
+  allowed: boolean;
+  /** Whether the candidate may retake *right now*. */
+  eligible: boolean;
+  /** ISO timestamp the retake unlocks, or null if eligible/never. */
+  availableAt: string | null;
+  cooldownDays: number;
+}
+
+/** Summary of a candidate's attempt (for the entry screen). */
+export interface AssessmentAttemptSummary {
+  id: string;
+  /** ISO timestamp. */
+  startedAt: string;
+  /** ISO timestamp, or null while still in progress. */
+  submittedAt: string | null;
+  score: number | null;
+  passed: boolean;
+  flaggedSuspicious: boolean;
+}
+
+/** Coarse state the assessment entry page branches on. */
+export type AssessmentEntryState =
+  | "ELIGIBLE" // fresh — may start
+  | "IN_PROGRESS" // unsubmitted attempt exists — resume
+  | "PASSED"
+  | "FAILED_RETAKE" // failed and may retake now
+  | "FAILED_COOLDOWN" // failed, retake locked until a future date
+  | "FAILED_FINAL" // failed, no retake allowed
+  | "NO_CV" // must submit a CV first
+  | "NOT_CONFIGURED" // no active assessment for this job
+  | "ALREADY_ADVANCED"; // application already past the assessment stage
+
+/** Everything the assessment entry / instructions page renders. */
+export interface AssessmentEntryDTO {
+  applicationId: string;
+  jobTitle: string;
+  companyName: string;
+  state: AssessmentEntryState;
+  config: AssessmentConfigDTO | null;
+  attempt: AssessmentAttemptSummary | null;
+  retake: RetakeStatus | null;
+}
+
+/** The payload that drives the live assessment interface. */
+export interface AssessmentTakeDTO {
+  attemptId: string;
+  /** ISO timestamp the attempt started. */
+  startedAt: string;
+  /** ISO timestamp the timer expires (startedAt + time limit). */
+  endsAt: string;
+  config: AssessmentConfigDTO;
+  questions: AssessmentQuestionDTO[];
+  tabSwitchCount: number;
+}
+
+/** Per-category (question-type) score breakdown on the result screen. */
+export interface AssessmentCategoryBreakdown {
+  category: QuestionType;
+  label: string;
+  correct: number;
+  total: number;
+  /** 0–100, rounded. */
+  percentage: number;
+}
+
+/** Final scored result for the result screen. */
+export interface AssessmentResultDTO {
+  applicationId: string;
+  jobTitle: string;
+  companyName: string;
+  /** 0–100, rounded. */
+  score: number;
+  passed: boolean;
+  passingScore: number;
+  /** ISO timestamp. */
+  submittedAt: string;
+  flaggedSuspicious: boolean;
+  totalQuestions: number;
+  correctCount: number;
+  categories: AssessmentCategoryBreakdown[];
+  /** Retake info when failed, else null. */
+  retake: RetakeStatus | null;
+}
+
+/** Response of `POST /api/assessment/[id]/tab-switch`. */
+export interface TabSwitchResult {
+  count: number;
+  /** True once the threshold is reached and the attempt must auto-submit. */
+  autoSubmit: boolean;
+}
+
+/** Response of `POST /api/assessment/[id]/start`. */
+export interface StartAttemptResult {
+  attemptId: string;
+  /** ISO timestamp. */
+  startedAt: string;
+  /** ISO timestamp the timer expires. */
+  endsAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// AI Interview — Stage 2 (SRS §3.5 M5)
+// ---------------------------------------------------------------------------
+
+/** Lifecycle of an invite token as the entry screen branches on it. */
+export type InterviewTokenState =
+  | "VALID" // not started — ready to begin
+  | "IN_PROGRESS" // started but not completed — resume
+  | "COMPLETED" // already submitted
+  | "EXPIRED" // past `inviteLinkExpiresAt`
+  | "NOT_FOUND"; // no such token
+
+/** A single AI-interview question, candidate-safe (no expected keywords). */
+export interface InterviewQuestionDTO {
+  id: string;
+  order: number;
+  questionText: string;
+  questionType: string;
+  /** Per-question answer window, seconds. */
+  maxTimeSeconds: number;
+}
+
+/** What the entry / device-check screen needs (token-scoped, no auth). */
+export interface InterviewEntryDTO {
+  token: string;
+  state: InterviewTokenState;
+  candidateName: string;
+  jobTitle: string;
+  companyName: string;
+  questionCount: number;
+  questionTimeLimitSeconds: number;
+  maxDurationMinutes: number;
+  /** ISO timestamp the link expires, or null. */
+  expiresAt: string | null;
+}
+
+/** What the live session screen needs once the interview has started. */
+export interface InterviewSessionDTO {
+  token: string;
+  candidateName: string;
+  jobTitle: string;
+  companyName: string;
+  /** AI interviewer's spoken introduction. */
+  intro: string;
+  questions: InterviewQuestionDTO[];
+  questionTimeLimitSeconds: number;
+  maxDurationMinutes: number;
+}
+
+/** Response of `POST /api/interview/[token]/identity`. */
+export interface InterviewIdentityResult {
+  identityPhotoUrl: string;
+}
+
+/** Response of `POST /api/interview/[token]/recording/chunk`. */
+export interface InterviewChunkResult {
+  chunkIndex: number;
+  received: true;
+}
+
+/** Response of `POST /api/interview/[token]/recording/finalize`. */
+export interface InterviewFinalizeResult {
+  recordingUrl: string | null;
+}
+
+/** Response of `POST /api/interview/[token]/follow-up`. */
+export interface InterviewFollowUpResult {
+  /** Null when the model decides a follow-up isn't warranted. */
+  followUp: string | null;
+}
+
+/** The five 0–100 sub-scores + qualitative analysis Gemini returns. */
+export interface InterviewScores {
+  technicalScore: number;
+  communicationScore: number;
+  behavioralScore: number;
+  confidenceScore: number;
+  overallInterviewScore: number;
+  strengths: string[];
+  improvements: string[];
+  aiSummary: string;
+  recommendation: InterviewRecommendation;
+}
+
+/** Tiering outcome surfaced after the interview is scored. */
+export interface TierRecordDTO {
+  tier: CandidateTier;
+  finalScore: number;
+  assessmentScore: number | null;
+  interviewScore: number | null;
+  assessmentWeight: number;
+  interviewWeight: number;
+}
+
+/** Response of `POST /api/interview/[token]/score` (completion + tiering). */
+export interface InterviewScoreResult {
+  scores: InterviewScores;
+  tier: TierRecordDTO;
 }

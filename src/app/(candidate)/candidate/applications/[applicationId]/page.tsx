@@ -17,6 +17,7 @@ import {
   authService,
   candidateService,
   applicationService,
+  interviewService,
 } from "@/lib/services";
 import { ROUTES, USER_ROLES } from "@/lib/constants";
 import {
@@ -62,6 +63,33 @@ export default async function ApplicationDetailPage({
   if (!app) notFound();
 
   const action = applicationAction(app.status);
+
+  // Route the next-action button. The Stage-1 assessment flow lives at
+  // /assessment/[id]; assessment outcomes deep-link to its result screen. The
+  // Stage-2 AI interview is token-based at /interview/<token> — resolve the
+  // owner-scoped invite token so "Start AI Interview" actually navigates there.
+  const assessmentHref = `/assessment/${app.id}`;
+
+  let interviewHref: string | null = null;
+  if (action === "interview" && profile) {
+    const invite = await interviewService.getInviteTokenForApplication(
+      app.id,
+      profile.id,
+    );
+    if (invite && invite.state !== "COMPLETED" && invite.state !== "EXPIRED") {
+      interviewHref = `/interview/${invite.token}`;
+    }
+  }
+
+  const actionHref =
+    action === "assessment"
+      ? assessmentHref
+      : action === "interview" && interviewHref
+        ? interviewHref
+        : action === "results" &&
+            (app.status === "ASSESSMENT_PASSED" || app.status === "ASSESSMENT_FAILED")
+          ? `${assessmentHref}/result`
+          : `${ROUTES.CANDIDATE}/applications/${app.id}`;
 
   return (
     <div className="space-y-6">
@@ -109,10 +137,7 @@ export default async function ApplicationDetailPage({
               {app.tier && <TierBadge tier={app.tier} />}
             </div>
             <Button asChild variant="brand" size="sm">
-              {/* Assessment/interview flows land here for now (built in later milestones). */}
-              <Link href={`${ROUTES.CANDIDATE}/applications/${app.id}`}>
-                {tApps(ACTION_LABEL_KEY[action])}
-              </Link>
+              <Link href={actionHref}>{tApps(ACTION_LABEL_KEY[action])}</Link>
             </Button>
           </div>
         </CardContent>

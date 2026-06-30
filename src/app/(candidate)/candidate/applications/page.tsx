@@ -73,6 +73,8 @@ export default async function ApplicationsPage() {
           {applications.map((app) => {
             const action = applicationAction(app.status);
             const href = `${ROUTES.CANDIDATE}/applications/${app.id}`;
+            // The assessment CTA deep-links to the Stage-1 entry screen.
+            const actionHref = action === "assessment" ? `/assessment/${app.id}` : href;
             return (
               <Card key={app.id}>
                 <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -112,7 +114,7 @@ export default async function ApplicationsPage() {
                     size="sm"
                     className="shrink-0"
                   >
-                    <Link href={href}>{t(ACTION_LABEL_KEY[action])}</Link>
+                    <Link href={actionHref}>{t(ACTION_LABEL_KEY[action])}</Link>
                   </Button>
                 </CardContent>
               </Card>

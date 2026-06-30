@@ -31,6 +31,12 @@ const serverSchema = z.object({
 
   // uploadthing file uploads (CVs, profile photos).
   UPLOADTHING_TOKEN: z.string().min(1, "UPLOADTHING_TOKEN is required"),
+
+  // Google Gemini API — AI interviewer + scoring (SRS M5, server-only).
+  GEMINI_API_KEY: z.string().min(1, "GEMINI_API_KEY is required"),
+
+  // Supabase Storage bucket for AI-interview recordings & identity snapshots.
+  INTERVIEW_RECORDINGS_BUCKET: z.string().min(1).default("interview-recordings"),
 });
 
 const clientSchema = z.object({

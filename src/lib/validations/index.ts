@@ -8,3 +8,5 @@ export * from "./auth.schemas";
 export * from "./candidate.schemas";
 export * from "./job.schemas";
 export * from "./application.schemas";
+export * from "./assessment.schemas";
+export * from "./interview.schemas";

@@ -526,6 +526,118 @@ export const APPLICATION_STATUS_LABELS: Record<string, string> = {
 };
 
 // ---------------------------------------------------------------------------
+// Trade Assessment — Stage 1 filter (SRS §3.4 M4)
+// ---------------------------------------------------------------------------
+/**
+ * Tab-switches tolerated before an attempt is auto-submitted and flagged as
+ * suspicious (anti-cheating, SRS §3.4). The Nth switch triggers the submit.
+ */
+export const ASSESSMENT_TAB_SWITCH_LIMIT = 3;
+
+/**
+ * Behaviour toggles not (yet) persisted on `TradeAssessment`. Surfaced through
+ * the assessment config so the UI already supports them; promote to DB columns
+ * when per-assessment overrides are needed.
+ */
+export const ASSESSMENT_DEFAULTS = {
+  /** Allow navigating back to earlier questions. */
+  allowPrevious: true,
+  /** Auto-advance to the next question after selecting an answer. */
+  autoAdvance: false,
+} as const;
+
+/** Human labels for the question types (used in the result breakdown). */
+export const QUESTION_TYPE_LABELS: Record<string, string> = {
+  MCQ: "Multiple choice",
+  MULTI_SELECT: "Multi-select",
+  SCENARIO: "Scenario",
+  IMAGE_BASED: "Image-based",
+};
+
+// ---------------------------------------------------------------------------
+// AI Interview — Stage 2 (SRS §3.5 M5)
+// ---------------------------------------------------------------------------
+/** Validity window of an AI-interview invite link, in hours. */
+export const AI_INTERVIEW_INVITE_TTL_HOURS = 72;
+
+/** Path the AI-interview invite link points at (`/interview/<token>`). */
+export const AI_INTERVIEW_BASE_PATH = "/interview";
+
+/** Default per-question answer window when the set/question doesn't override. */
+export const AI_INTERVIEW_QUESTION_TIME_LIMIT_SECONDS = 90;
+
+/** Minimum time a candidate must speak before "Next Question" is enabled. */
+export const AI_INTERVIEW_MIN_RESPONSE_SECONDS = 10;
+
+/** Cadence (ms) at which the browser flushes recording chunks to storage. */
+export const AI_INTERVIEW_CHUNK_INTERVAL_MS = 30_000;
+
+/** Human labels for the AI-interview question categories (Prisma enum). */
+export const AI_INTERVIEW_QUESTION_TYPE_LABELS: Record<string, string> = {
+  TECHNICAL: "Technical",
+  BEHAVIORAL: "Behavioral",
+  COMMUNICATION: "Communication",
+  MOTIVATION: "Motivation",
+};
+
+/** Gemini's hiring recommendation (SRS §3.5.3 FR-AI-009). */
+export const AI_INTERVIEW_RECOMMENDATIONS = {
+  STRONG_RECOMMEND: "STRONG_RECOMMEND",
+  RECOMMEND: "RECOMMEND",
+  NEUTRAL: "NEUTRAL",
+  NOT_RECOMMEND: "NOT_RECOMMEND",
+} as const;
+
+export type InterviewRecommendation =
+  (typeof AI_INTERVIEW_RECOMMENDATIONS)[keyof typeof AI_INTERVIEW_RECOMMENDATIONS];
+export const AI_INTERVIEW_RECOMMENDATION_VALUES = Object.values(
+  AI_INTERVIEW_RECOMMENDATIONS,
+) as InterviewRecommendation[];
+
+export const AI_INTERVIEW_RECOMMENDATION_LABELS: Record<
+  InterviewRecommendation,
+  string
+> = {
+  STRONG_RECOMMEND: "Strongly recommend",
+  RECOMMEND: "Recommend",
+  NEUTRAL: "Neutral",
+  NOT_RECOMMEND: "Do not recommend",
+};
+
+/**
+ * Fallback question bank used when a job has no `AIInterviewSet` configured, so
+ * the candidate always has a complete interview. `expectedKeywords` is empty —
+ * scoring is qualitative for these generic prompts.
+ */
+export const DEFAULT_AI_INTERVIEW_QUESTIONS = [
+  {
+    questionText:
+      "Tell us about your professional background and the experience that makes you a strong fit for this role.",
+    questionType: "MOTIVATION",
+  },
+  {
+    questionText:
+      "Describe a challenging situation you faced at work and how you handled it.",
+    questionType: "BEHAVIORAL",
+  },
+  {
+    questionText:
+      "Walk us through the core technical skills you use day to day in your trade.",
+    questionType: "TECHNICAL",
+  },
+  {
+    questionText:
+      "How do you communicate and coordinate with a team when working on-site?",
+    questionType: "COMMUNICATION",
+  },
+  {
+    questionText:
+      "Why do you want to work abroad, and what are your goals for this opportunity?",
+    questionType: "MOTIVATION",
+  },
+] as const;
+
+// ---------------------------------------------------------------------------
 // Misc
 // ---------------------------------------------------------------------------
 /** Primary labor corridor for Phase 1 (Pakistan → Saudi Arabia). */

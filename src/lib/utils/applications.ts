@@ -41,6 +41,9 @@ export type ApplicationAction = "assessment" | "interview" | "results" | "track"
 /** Which action button to surface for a given application status. */
 export function applicationAction(status: ApplicationStatus): ApplicationAction {
   switch (status) {
+    // After applying, the candidate's next step is the Stage-1 assessment. The
+    // entry screen handles eligibility (CV present, assessment configured, …).
+    case "APPLIED":
     case "ASSESSMENT_PENDING":
       return "assessment";
     case "INTERVIEW_INVITED":
