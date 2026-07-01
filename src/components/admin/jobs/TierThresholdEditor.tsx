@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import { AlertCircle } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -119,13 +118,6 @@ export function TierThresholdEditor({
             </thead>
             <tbody className="divide-y">
               {TIERS.map(({ key, label, color }, idx) => {
-                const nextTier = TIERS[idx + 1];
-                const maxScore = idx === 0 ? 100 : (thresholds[TIERS[idx - 1].key] - 1);
-                const rangeLabel =
-                  nextTier
-                    ? `${thresholds[key]}% – ${thresholds[TIERS[idx - 1]?.key] != null ? thresholds[TIERS[idx - 1].key] - 1 : 100}%`
-                    : `${thresholds[key]}% – ${idx === 0 ? 100 : (thresholds[TIERS[idx - 1].key] - 1)}%`;
-
                 return (
                   <tr key={key} className="hover:bg-muted/20">
                     <td className={cn("px-4 py-3 font-semibold", color)}>{label}</td>

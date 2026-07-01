@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
@@ -9,6 +10,7 @@ import {
   Copy,
   Edit2,
   Eye,
+  Loader2,
   MoreHorizontal,
   ToggleLeft,
   ToggleRight,
@@ -56,28 +58,42 @@ function StatusBadge({ status }: { status: JobPostStatus }) {
 
 function JobRowActions({ job }: { job: AdminJobListItem }) {
   const router = useRouter();
+  const [pending, setPending] = useState<"toggle" | "clone" | null>(null);
 
   async function handleToggleStatus() {
     const newStatus: JobPostStatus =
       job.status === "ACTIVE" ? "CLOSED" : "ACTIVE";
-    const result = await updateJobStatusAction(job.id, newStatus);
-    if (result.ok) {
-      toast.success(`Job marked as ${newStatus.toLowerCase()}`);
-      router.refresh();
-    } else {
-      toast.error(result.error);
+    setPending("toggle");
+    try {
+      const result = await updateJobStatusAction(job.id, newStatus);
+      if (result.ok) {
+        toast.success(`Job marked as ${newStatus.toLowerCase()}`);
+        router.refresh();
+      } else {
+        toast.error(result.error);
+      }
+    } finally {
+      setPending(null);
     }
   }
 
   async function handleClone() {
-    const result = await cloneJobPostAction(job.id);
-    if (result.ok) {
-      toast.success("Job cloned as draft");
-      router.push(`${ROUTES.ADMIN}/jobs/${result.data.id}/edit`);
-    } else {
-      toast.error(result.error);
+    setPending("clone");
+    try {
+      const result = await cloneJobPostAction(job.id);
+      if (result.ok) {
+        toast.success("Job cloned as draft");
+        router.push(`${ROUTES.ADMIN}/jobs/${result.data.id}/edit`);
+      } else {
+        toast.error(result.error);
+        setPending(null);
+      }
+    } catch {
+      setPending(null);
     }
   }
+
+  const busy = pending !== null;
 
   return (
     <div className="flex items-center justify-end gap-0.5">
@@ -93,8 +109,18 @@ function JobRowActions({ job }: { job: AdminJobListItem }) {
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="size-8" title="More actions">
-            <MoreHorizontal className="size-4" />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            title="More actions"
+            disabled={busy}
+          >
+            {busy ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <MoreHorizontal className="size-4" />
+            )}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-44">
