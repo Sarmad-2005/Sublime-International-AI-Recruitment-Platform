@@ -9,8 +9,8 @@ import {
   ROUTES,
   type CandidateTier,
 } from "@/lib/constants";
-import { resend, EMAIL_FROM, applicationReceivedEmail } from "@/lib/email";
-import { clientEnv } from "@/lib/env";
+import { sendEmail, applicationReceivedEmail } from "@/lib/email";
+import { absoluteUrl } from "@/lib/utils/url";
 import type { ApplicationStatus } from "@/generated/prisma/enums";
 import type {
   ApplicationDetailDTO,
@@ -149,23 +149,15 @@ export async function createApplication(
 
   // Confirmation email (Resend) — best-effort.
   try {
-    const detailUrl = new URL(
-      `${ROUTES.CANDIDATE}/applications/${application.id}`,
-      clientEnv.NEXT_PUBLIC_APP_URL,
-    ).toString();
     const template = applicationReceivedEmail({
       candidateName: candidate.fullName,
       jobTitle: job.title,
       companyName: job.saudiClient.companyName,
-      applicationUrl: detailUrl,
+      applicationUrl: absoluteUrl(
+        `${ROUTES.CANDIDATE}/applications/${application.id}`,
+      ),
     });
-    await resend.emails.send({
-      from: EMAIL_FROM,
-      to: candidate.user.email,
-      subject: template.subject,
-      html: template.html,
-      text: template.text,
-    });
+    await sendEmail(candidate.user.email, template);
   } catch (error) {
     console.error("Failed to send application confirmation email", error);
   }

@@ -9,6 +9,7 @@
  * Services are namespaced (`authService.signIn(...)`) to keep call sites
  * self-documenting and avoid name collisions between domains.
  */
+export * as adminService from "./admin.service";
 export * as authService from "./auth.service";
 export * as candidateService from "./candidate.service";
 export * as jobService from "./job.service";

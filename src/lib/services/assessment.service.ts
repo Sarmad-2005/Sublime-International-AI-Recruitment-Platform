@@ -12,12 +12,11 @@ import {
   ROUTES,
 } from "@/lib/constants";
 import {
-  resend,
-  EMAIL_FROM,
+  sendEmail,
   assessmentResultEmail,
   aiInterviewInviteEmail,
 } from "@/lib/email";
-import { clientEnv } from "@/lib/env";
+import { absoluteUrl } from "@/lib/utils/url";
 import type { QuestionType } from "@/generated/prisma/enums";
 import type {
   AssessmentCategoryBreakdown,
@@ -787,10 +786,6 @@ export async function getAttemptResult(
 // Post-pass automation
 // ---------------------------------------------------------------------------
 
-function absoluteUrl(path: string): string {
-  return new URL(path, clientEnv.NEXT_PUBLIC_APP_URL).toString();
-}
-
 interface ResultEmailArgs {
   email: string;
   candidateName: string;
@@ -813,13 +808,7 @@ async function sendResultEmail(args: ResultEmailArgs): Promise<void> {
       passingScore: args.passingScore,
       resultUrl: absoluteUrl(`/assessment/${args.applicationId}/result`),
     });
-    await resend.emails.send({
-      from: EMAIL_FROM,
-      to: args.email,
-      subject: template.subject,
-      html: template.html,
-      text: template.text,
-    });
+    await sendEmail(args.email, template);
   } catch (error) {
     console.error("Failed to send assessment result email", error);
   }
@@ -881,13 +870,7 @@ async function provisionAiInterview(args: ProvisionArgs): Promise<void> {
       interviewUrl,
       expiresAtLabel,
     });
-    await resend.emails.send({
-      from: EMAIL_FROM,
-      to: args.email,
-      subject: template.subject,
-      html: template.html,
-      text: template.text,
-    });
+    await sendEmail(args.email, template);
   } catch (error) {
     console.error("Failed to send AI interview invite email", error);
   }

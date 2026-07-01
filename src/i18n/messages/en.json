@@ -385,5 +385,96 @@
       "inProgress": "In progress",
       "completed": "Completed"
     }
+  },
+  "admin": {
+    "nav": {
+      "brand": "SIORP",
+      "openNav": "Open navigation",
+      "closeNav": "Close navigation",
+      "collapse": "Collapse",
+      "expandSidebar": "Expand sidebar",
+      "collapseSidebar": "Collapse sidebar",
+      "search": "Global search",
+      "searchPlaceholder": "Search candidates, jobs, clients…",
+      "notifications": "Notifications",
+      "markAllRead": "Mark all read",
+      "noNotifications": "No notifications.",
+      "account": "Account menu",
+      "administrator": "Administrator",
+      "settings": "Settings",
+      "signOut": "Sign out",
+      "sections": {
+        "overview": "Overview",
+        "recruitment": "Recruitment",
+        "clients": "Clients",
+        "assessment": "Assessment",
+        "operations": "Operations",
+        "system": "System"
+      },
+      "items": {
+        "dashboard": "Dashboard",
+        "jobs": "Job Posts",
+        "candidates": "Candidates",
+        "applications": "Applications",
+        "saudiClients": "Saudi Clients",
+        "pools": "Candidate Pools",
+        "questionBanks": "Question Banks",
+        "interviewSets": "Interview Sets",
+        "postSelection": "Post-Selection",
+        "liveInterviews": "Live Interviews",
+        "medical": "Medical",
+        "users": "Users",
+        "auditLog": "Audit Log",
+        "settings": "Settings"
+      }
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "subtitle": "Platform overview across recruitment, assessment and deployment.",
+      "metrics": {
+        "activeJobPosts": "Active Job Posts",
+        "candidatesInPipeline": "Candidates in Pipeline",
+        "shortlistedThisMonth": "Shortlisted This Month",
+        "placementsThisYear": "Placements This Year",
+        "vsLastPeriod": "vs last period"
+      },
+      "pipeline": {
+        "title": "Recruitment Pipeline",
+        "description": "Candidates reaching each stage. Click a bar to view that group.",
+        "empty": "No candidates in the pipeline yet.",
+        "series": "Candidates"
+      },
+      "tiers": {
+        "title": "Tier Distribution",
+        "description": "Classification across all tiered candidates.",
+        "empty": "No candidates have been tiered yet.",
+        "centerLabel": "Tiered"
+      },
+      "activity": {
+        "title": "Recent Activity",
+        "empty": "No recent activity."
+      },
+      "topJobs": {
+        "title": "Top Job Posts",
+        "description": "Ranked by total applications received.",
+        "empty": "No job posts yet.",
+        "colTitle": "Job Title",
+        "colApplicants": "Applicants",
+        "colShortlisted": "Shortlisted",
+        "colDeadline": "Deadline",
+        "colStatus": "Status"
+      },
+      "jobStatus": {
+        "ACTIVE": "Active",
+        "DRAFT": "Draft",
+        "CLOSED": "Closed",
+        "FILLED": "Filled"
+      }
+    },
+    "error": {
+      "title": "Something went wrong",
+      "description": "We couldn't load this page. This is usually temporary — please try again.",
+      "retry": "Try again"
+    }
   }
 }

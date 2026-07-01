@@ -11,12 +11,9 @@ import {
   type InterviewRecommendation,
 } from "@/lib/constants";
 import { runAi, type AiDebugEntry } from "@/lib/ai";
-import {
-  resend,
-  EMAIL_FROM,
-  interviewTierResultEmail,
-} from "@/lib/email";
-import { clientEnv } from "@/lib/env";
+import { sendEmail, interviewTierResultEmail } from "@/lib/email";
+import { absoluteUrl } from "@/lib/utils/url";
+import type { AIInterviewStatus } from "@/generated/prisma/enums";
 import {
   finalizeRecording as finalizeStorageRecording,
   uploadIdentitySnapshot,
@@ -207,16 +204,22 @@ async function loadByToken(token: string): Promise<AttemptContext | null> {
   });
 }
 
-/** Derive the entry-screen state from status + expiry. */
-function tokenState(attempt: AttemptContext): InterviewTokenState {
-  if (attempt.status === "COMPLETED") return "COMPLETED";
+/** Derive the entry-screen state from a status + expiry (shared by the token
+ * loader and the by-application lookup). */
+function computeTokenState(
+  status: AIInterviewStatus,
+  expiresAt: Date | null,
+): InterviewTokenState {
+  if (status === "COMPLETED") return "COMPLETED";
   const expired =
-    attempt.status === "EXPIRED" ||
-    (attempt.inviteLinkExpiresAt != null &&
-      attempt.inviteLinkExpiresAt.getTime() < Date.now());
+    status === "EXPIRED" || (expiresAt != null && expiresAt.getTime() < Date.now());
   if (expired) return "EXPIRED";
-  if (attempt.status === "IN_PROGRESS") return "IN_PROGRESS";
+  if (status === "IN_PROGRESS") return "IN_PROGRESS";
   return "VALID";
+}
+
+function tokenState(attempt: AttemptContext): InterviewTokenState {
+  return computeTokenState(attempt.status, attempt.inviteLinkExpiresAt);
 }
 
 // ---------------------------------------------------------------------------
@@ -331,21 +334,10 @@ export async function getInviteTokenForApplication(
     select: { inviteLinkToken: true, status: true, inviteLinkExpiresAt: true },
   });
   if (!attempt) return null;
-
-  const expired =
-    attempt.status === "EXPIRED" ||
-    (attempt.inviteLinkExpiresAt != null &&
-      attempt.inviteLinkExpiresAt.getTime() < Date.now());
-  const state: InterviewTokenState =
-    attempt.status === "COMPLETED"
-      ? "COMPLETED"
-      : expired
-        ? "EXPIRED"
-        : attempt.status === "IN_PROGRESS"
-          ? "IN_PROGRESS"
-          : "VALID";
-
-  return { token: attempt.inviteLinkToken, state };
+  return {
+    token: attempt.inviteLinkToken,
+    state: computeTokenState(attempt.status, attempt.inviteLinkExpiresAt),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -873,10 +865,6 @@ export async function completeAndScore(
 // Notifications (candidate email + in-app, admin in-app)
 // ---------------------------------------------------------------------------
 
-function absoluteUrl(path: string): string {
-  return new URL(path, clientEnv.NEXT_PUBLIC_APP_URL).toString();
-}
-
 interface NotifyArgs {
   userId: string;
   email: string;
@@ -900,13 +888,7 @@ async function notifyTierAssigned(args: NotifyArgs): Promise<void> {
       finalScore: args.tier.finalScore,
       applicationUrl: absoluteUrl(`${ROUTES.CANDIDATE}/applications/${args.applicationId}`),
     });
-    await resend.emails.send({
-      from: EMAIL_FROM,
-      to: args.email,
-      subject: template.subject,
-      html: template.html,
-      text: template.text,
-    });
+    await sendEmail(args.email, template);
   } catch (error) {
     console.error("Failed to send tier result email", error);
   }

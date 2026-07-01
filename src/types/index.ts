@@ -800,3 +800,78 @@ export interface InterviewScoreResult {
   scores: InterviewScores;
   tier: TierRecordDTO;
 }
+
+// ---------------------------------------------------------------------------
+// Admin dashboard (SRS §3.7 M12 — staff overview & analytics)
+// ---------------------------------------------------------------------------
+
+/**
+ * A single headline metric: the current value plus the percent change versus the
+ * comparable previous period. `change` is `null` when a meaningful comparison
+ * isn't possible (e.g. the previous period had zero activity).
+ */
+export interface DashboardMetric {
+  value: number;
+  /** Signed percent change vs the previous period, rounded, or `null`. */
+  change: number | null;
+}
+
+/** The four headline cards on the admin dashboard. */
+export interface DashboardMetrics {
+  /** Job posts currently ACTIVE. Change = posts published this vs last month. */
+  activeJobPosts: DashboardMetric;
+  /** Applications in an active (non-terminal) pipeline state. */
+  candidatesInPipeline: DashboardMetric;
+  /** Applications that reached a shortlisted state this calendar month. */
+  shortlistedThisMonth: DashboardMetric;
+  /** Candidates deployed this calendar year. */
+  placementsThisYear: DashboardMetric;
+}
+
+/** One stage of the recruitment funnel (cumulative — reached at-or-past stage). */
+export interface PipelineStageCount {
+  stage: PipelineStage;
+  label: string;
+  count: number;
+}
+
+/** Ordered funnel from Applied → Post-Selection. */
+export type PipelineCounts = PipelineStageCount[];
+
+/** One slice of the tier-distribution pie. */
+export interface TierDistributionItem {
+  tier: CandidateTier;
+  label: string;
+  count: number;
+}
+
+/** Diamond / Platinum / Gold / Bronze / Pending breakdown. */
+export type TierDistribution = TierDistributionItem[];
+
+/**
+ * One entry in the admin recent-activity feed, derived from an `AuditLog` row.
+ * JSON-safe so it flows from the Server Component to the realtime client feed.
+ */
+export interface ActivityItem {
+  id: string;
+  /** Human-readable, pre-formatted message. */
+  message: string;
+  /** Deep link to the related record, or `null`. */
+  href: string | null;
+  /** ISO timestamp of the event. */
+  timestamp: string;
+}
+
+/** A row in the "Top Job Posts" table on the dashboard. */
+export interface TopJobPost {
+  id: string;
+  title: string;
+  companyName: string;
+  /** Total applications received. */
+  applicants: number;
+  /** Applications that reached a shortlisted state. */
+  shortlisted: number;
+  /** ISO timestamp or null. */
+  deadline: string | null;
+  status: JobPostStatus;
+}
