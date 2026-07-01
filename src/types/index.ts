@@ -875,3 +875,124 @@ export interface TopJobPost {
   deadline: string | null;
   status: JobPostStatus;
 }
+
+// ---------------------------------------------------------------------------
+// Admin Candidate Management — SRS §3.7 M12
+// ---------------------------------------------------------------------------
+
+export interface AdminCandidateListItem {
+  applicationId: string;
+  candidateId: string;
+  fullName: string;
+  profilePhotoUrl: string | null;
+  jobTitle: string;
+  jobPostId: string;
+  companyName: string;
+  /** ISO timestamp. */
+  appliedAt: string;
+  status: ApplicationStatus;
+  tier: CandidateTier;
+  assessmentScore: number | null;
+  /** null when no attempt exists yet. */
+  assessmentPassed: boolean | null;
+  interviewScore: number | null;
+  finalScore: number | null;
+  flaggedSuspicious: boolean;
+}
+
+export type AdminCandidateFilters = {
+  q: string | null;
+  jobPostId: string | null;
+  statuses: ApplicationStatus[];
+  tiers: CandidateTier[];
+  /** null = no filter; true/false = filter by outcome. */
+  assessmentPassed: boolean | null;
+  /** ISO date string or null. */
+  dateFrom: string | null;
+  dateTo: string | null;
+};
+
+export type PaginatedCandidates = Paginated<AdminCandidateListItem>;
+
+export interface AdminCandidateNote {
+  id: string;
+  note: string;
+  adminId: string | null;
+  /** ISO timestamp. */
+  createdAt: string;
+}
+
+export interface SaudiClientSummary {
+  id: string;
+  companyName: string;
+  city: string;
+  logoUrl: string | null;
+}
+
+export interface JobPostSummary {
+  id: string;
+  title: string;
+}
+
+export interface AdminAssessmentDetail {
+  score: number | null;
+  passed: boolean;
+  flaggedSuspicious: boolean;
+  tabSwitchCount: number;
+  submittedAt: string | null;
+}
+
+export interface AdminInterviewDetail {
+  status: string;
+  overallScore: number | null;
+  technicalScore: number | null;
+  communicationScore: number | null;
+  behavioralScore: number | null;
+  confidenceScore: number | null;
+  aiSummary: string | null;
+  recordingUrl: string | null;
+  completedAt: string | null;
+}
+
+export interface AdminTierRecord {
+  tier: CandidateTier;
+  finalScore: number | null;
+  assessmentScore: number | null;
+  interviewScore: number | null;
+  assessmentWeight: number;
+  interviewWeight: number;
+  adminOverride: boolean;
+  adminOverrideNote: string | null;
+  assignedAt: string | null;
+}
+
+export interface AdminApplicationSummary {
+  id: string;
+  jobPostId: string;
+  jobTitle: string;
+  companyName: string;
+  status: ApplicationStatus;
+  appliedAt: string;
+  tier: CandidateTier;
+  finalScore: number | null;
+  assessment: AdminAssessmentDetail | null;
+  interview: AdminInterviewDetail | null;
+  tierRecord: AdminTierRecord | null;
+  postSelection: {
+    offerLetterStatus: string;
+    gamcaStatus: string;
+    visaStatus: string;
+    ticketArrangement: string;
+    preDepartureBriefStatus: string;
+    arrivalStatus: string;
+    probationStatus: string;
+  } | null;
+}
+
+export interface AdminCandidateDetailView {
+  candidate: CandidateProfileDTO;
+  userEmail: string;
+  userPhone: string | null;
+  applications: AdminApplicationSummary[];
+  notes: AdminCandidateNote[];
+}

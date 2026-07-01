@@ -6,7 +6,7 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   // The Prisma 7 client + pg driver adapter run on the Node.js runtime only.
-  serverExternalPackages: ["@prisma/adapter-pg", "pg"],
+  serverExternalPackages: ["@prisma/adapter-pg", "pg", "@react-pdf/renderer"],
   images: {
     remotePatterns: [
       // uploadthing CDN (candidate profile photos, documents).
