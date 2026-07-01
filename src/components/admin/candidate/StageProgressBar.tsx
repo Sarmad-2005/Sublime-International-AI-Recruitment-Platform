@@ -1,4 +1,5 @@
 import { Check } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { cn } from "@/lib/utils";
 import {
@@ -40,7 +41,8 @@ function getStageIndex(status: ApplicationStatus): number {
   return PIPELINE_STAGE_ORDER.indexOf(stage);
 }
 
-export function StageProgressBar({ status }: { status: ApplicationStatus }) {
+export async function StageProgressBar({ status }: { status: ApplicationStatus }) {
+  const t = await getTranslations("admin.candidates.stageBar");
   const currentIndex = getStageIndex(status);
   const isRejected = status === "REJECTED" || status === "WITHDRAWN";
 
@@ -91,7 +93,7 @@ export function StageProgressBar({ status }: { status: ApplicationStatus }) {
       </ol>
       {isRejected && (
         <p className="mt-2 text-xs font-medium text-red-500">
-          {status === "WITHDRAWN" ? "Application withdrawn" : "Rejected"}
+          {status === "WITHDRAWN" ? t("withdrawn") : t("rejected")}
         </p>
       )}
     </div>

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Building2, FolderPlus } from "lucide-react";
 
@@ -29,6 +30,7 @@ export function AddToPoolModal({
   saudiClients,
   candidateName,
 }: AddToPoolModalProps) {
+  const t = useTranslations("admin.candidates.poolModal");
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
@@ -47,14 +49,12 @@ export function AddToPoolModal({
       );
       const failed = results.filter((r) => !r.ok);
       if (failed.length === 0) {
-        toast.success(
-          `Added to ${selected.length} client pool${selected.length !== 1 ? "s" : ""}`,
-        );
+        toast.success(t("successToast", { count: selected.length }));
         setOpen(false);
         setSelected([]);
         router.refresh();
       } else {
-        toast.error("Some pool additions failed. Please try again.");
+        toast.error(t("failToast"));
       }
     });
   }
@@ -64,23 +64,27 @@ export function AddToPoolModal({
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <FolderPlus className="size-4" />
-          Add to Client Pool
+          {t("trigger")}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Add to Saudi Client Pool</DialogTitle>
+          <DialogTitle>{t("title")}</DialogTitle>
         </DialogHeader>
 
         <p className="text-muted-foreground text-sm">
-          Select which client(s) to share{" "}
-          <span className="font-medium text-foreground">{candidateName}</span> with.
+          {t.rich("prompt", {
+            name: candidateName,
+            strong: (chunks) => (
+              <span className="font-medium text-foreground">{chunks}</span>
+            ),
+          })}
         </p>
 
         <div className="max-h-64 space-y-2 overflow-y-auto py-1">
           {saudiClients.length === 0 ? (
             <p className="text-muted-foreground py-4 text-center text-sm">
-              No Saudi clients found.
+              {t("empty")}
             </p>
           ) : (
             saudiClients.map((client) => (
@@ -107,15 +111,17 @@ export function AddToPoolModal({
 
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
+            {t("cancel")}
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={isPending || selected.length === 0}
           >
             {isPending
-              ? "Adding…"
-              : `Add to ${selected.length || ""} Pool${selected.length !== 1 ? "s" : ""}`}
+              ? t("adding")
+              : selected.length === 1
+                ? t("add", { count: 1 })
+                : t("addPlural", { count: selected.length })}
           </Button>
         </div>
       </DialogContent>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { FileDown } from "lucide-react";
 import {
@@ -216,17 +217,18 @@ interface PDFExportProps {
 }
 
 export function PDFExportButton({ applicationIds, disabled }: PDFExportProps) {
+  const t = useTranslations("admin.candidates.pdf");
   const [isPending, startTransition] = useTransition();
 
   function handleExport() {
     if (applicationIds.length === 0) {
-      toast.error("Select at least one candidate to export.");
+      toast.error(t("selectAtLeast"));
       return;
     }
     startTransition(async () => {
       const result = await exportCandidatesPDFAction(applicationIds);
       if (!result.ok) {
-        toast.error(result.error ?? "Export failed.");
+        toast.error(result.error ?? t("exportFailed"));
         return;
       }
       const bytes = Uint8Array.from(atob(result.base64), (c) => c.charCodeAt(0));
@@ -237,7 +239,7 @@ export function PDFExportButton({ applicationIds, disabled }: PDFExportProps) {
       a.download = `siorp-candidates-${Date.now()}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success(`PDF exported for ${applicationIds.length} candidate${applicationIds.length !== 1 ? "s" : ""}`);
+      toast.success(t("exportedToast", { count: applicationIds.length }));
     });
   }
 
@@ -249,7 +251,7 @@ export function PDFExportButton({ applicationIds, disabled }: PDFExportProps) {
       disabled={disabled || isPending || applicationIds.length === 0}
     >
       <FileDown className="size-4" />
-      {isPending ? "Generating PDF…" : "Export PDF"}
+      {isPending ? t("generating") : t("export")}
     </Button>
   );
 }

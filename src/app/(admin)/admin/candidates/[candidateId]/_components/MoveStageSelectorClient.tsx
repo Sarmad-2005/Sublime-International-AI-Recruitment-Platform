@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { MoveRight } from "lucide-react";
 
@@ -35,6 +36,7 @@ const STAGE_OPTIONS: { label: string; value: ApplicationStatus }[] = [
 ];
 
 export function MoveStageSelectorClient({ applicationId }: { applicationId: string }) {
+  const t = useTranslations("admin.candidates.moveStage");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -43,7 +45,9 @@ export function MoveStageSelectorClient({ applicationId }: { applicationId: stri
     startTransition(async () => {
       const result = await moveCandidateStageAction(applicationId, status);
       if (result.ok) {
-        toast.success(`Moved to "${APPLICATION_STATUS_LABELS[status] ?? status}"`);
+        toast.success(
+          t("successToast", { stage: APPLICATION_STATUS_LABELS[status] ?? status }),
+        );
         router.refresh();
       } else {
         toast.error(result.error);
@@ -56,7 +60,7 @@ export function MoveStageSelectorClient({ applicationId }: { applicationId: stri
       <MoveRight className="text-muted-foreground size-4 shrink-0" />
       <Select onValueChange={handleChange} disabled={isPending}>
         <SelectTrigger className="h-8 w-48">
-          <SelectValue placeholder="Move to stage…" />
+          <SelectValue placeholder={t("placeholder")} />
         </SelectTrigger>
         <SelectContent>
           {STAGE_OPTIONS.map((s) => (

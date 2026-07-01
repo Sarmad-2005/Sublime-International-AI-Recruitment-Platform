@@ -399,6 +399,12 @@ model JobPost {
   status                 JobStatus @default(DRAFT)
   publishedAt            DateTime? @map("published_at")
 
+  // Scoring weights (FR-JOB-002) — must sum to 100.
+  assessmentWeight Float @default(35) @map("assessment_weight")
+  interviewWeight  Float @default(65) @map("interview_weight")
+  // Per-job tier cut-offs (FR-JOB-002) — overrides platform defaults when set.
+  tierThresholds Json? @map("tier_thresholds")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 

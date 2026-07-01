@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { Search, X } from "lucide-react";
 
 import {
@@ -59,6 +60,7 @@ interface CandidatesFiltersBarProps {
 }
 
 export function CandidatesFiltersBar({ filters, jobPosts }: CandidatesFiltersBarProps) {
+  const t = useTranslations("admin.candidates.filters");
   const router = useRouter();
   const pathname = usePathname();
   const searchRef = useRef<HTMLInputElement>(null);
@@ -119,12 +121,12 @@ export function CandidatesFiltersBar({ filters, jobPosts }: CandidatesFiltersBar
           <Input
             ref={searchRef}
             defaultValue={filters.q ?? ""}
-            placeholder="Name, CNIC, phone…"
+            placeholder={t("searchPlaceholder")}
             className="h-9 w-56 pl-8"
           />
         </div>
         <Button type="submit" size="sm" variant="secondary">
-          Search
+          {t("search")}
         </Button>
       </form>
 
@@ -134,10 +136,10 @@ export function CandidatesFiltersBar({ filters, jobPosts }: CandidatesFiltersBar
         onValueChange={(v) => push({ jobPostId: v === "__all__" ? null : v })}
       >
         <SelectTrigger className="h-9 w-48">
-          <SelectValue placeholder="All Job Posts" />
+          <SelectValue placeholder={t("allJobPosts")} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="__all__">All Job Posts</SelectItem>
+          <SelectItem value="__all__">{t("allJobPosts")}</SelectItem>
           {jobPosts.map((j) => (
             <SelectItem key={j.id} value={j.id}>
               {j.title}
@@ -150,7 +152,7 @@ export function CandidatesFiltersBar({ filters, jobPosts }: CandidatesFiltersBar
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" className="h-9">
-            Stage
+            {t("stage")}
             {filters.statuses.length > 0 && (
               <span className="bg-royal text-white ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold">
                 {filters.statuses.length}
@@ -159,7 +161,7 @@ export function CandidatesFiltersBar({ filters, jobPosts }: CandidatesFiltersBar
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-52 max-h-80 overflow-y-auto">
-          <DropdownMenuLabel>Pipeline Stage</DropdownMenuLabel>
+          <DropdownMenuLabel>{t("pipelineStage")}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           {PIPELINE_STATUSES.map((s) => (
             <label
@@ -182,7 +184,7 @@ export function CandidatesFiltersBar({ filters, jobPosts }: CandidatesFiltersBar
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" className="h-9">
-            Tier
+            {t("tier")}
             {filters.tiers.length > 0 && (
               <span className="bg-royal text-white ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold">
                 {filters.tiers.length}
@@ -191,7 +193,7 @@ export function CandidatesFiltersBar({ filters, jobPosts }: CandidatesFiltersBar
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-44">
-          <DropdownMenuLabel>Candidate Tier</DropdownMenuLabel>
+          <DropdownMenuLabel>{t("candidateTier")}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           {TIER_OPTIONS.map((t) => (
             <label
@@ -225,12 +227,12 @@ export function CandidatesFiltersBar({ filters, jobPosts }: CandidatesFiltersBar
         }
       >
         <SelectTrigger className="h-9 w-44">
-          <SelectValue placeholder="Assessment" />
+          <SelectValue placeholder={t("assessment")} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="__all__">Any Assessment</SelectItem>
-          <SelectItem value="true">Assessment Passed</SelectItem>
-          <SelectItem value="false">Assessment Failed</SelectItem>
+          <SelectItem value="__all__">{t("anyAssessment")}</SelectItem>
+          <SelectItem value="true">{t("assessmentPassed")}</SelectItem>
+          <SelectItem value="false">{t("assessmentFailed")}</SelectItem>
         </SelectContent>
       </Select>
 
@@ -241,7 +243,7 @@ export function CandidatesFiltersBar({ filters, jobPosts }: CandidatesFiltersBar
           value={filters.dateFrom ?? ""}
           onChange={(e) => push({ dateFrom: e.target.value || null })}
           className="h-9 w-36"
-          aria-label="Applied from date"
+          aria-label={t("appliedFromLabel")}
         />
         <span className="text-muted-foreground text-xs">–</span>
         <Input
@@ -249,7 +251,7 @@ export function CandidatesFiltersBar({ filters, jobPosts }: CandidatesFiltersBar
           value={filters.dateTo ?? ""}
           onChange={(e) => push({ dateTo: e.target.value || null })}
           className="h-9 w-36"
-          aria-label="Applied to date"
+          aria-label={t("appliedToLabel")}
         />
       </div>
 
@@ -272,7 +274,7 @@ export function CandidatesFiltersBar({ filters, jobPosts }: CandidatesFiltersBar
           }
         >
           <X className="size-3.5" />
-          Clear filters
+          {t("clear")}
         </Button>
       )}
     </div>

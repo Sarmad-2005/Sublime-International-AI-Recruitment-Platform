@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Pause, Play, Volume2, VolumeX } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -15,6 +16,7 @@ export function InterviewRecordingPlayer({
   url,
   className,
 }: InterviewRecordingPlayerProps) {
+  const t = useTranslations("admin.candidates.recording");
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
@@ -27,7 +29,7 @@ export function InterviewRecordingPlayer({
           className,
         )}
       >
-        No recording available for this interview.
+        {t("none")}
       </div>
     );
   }
@@ -73,7 +75,7 @@ export function InterviewRecordingPlayer({
           {muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
         </Button>
         <span className="text-xs text-white/60 select-none">
-          Secure preview — download disabled
+          {t("secureNotice")}
         </span>
       </div>
     </div>

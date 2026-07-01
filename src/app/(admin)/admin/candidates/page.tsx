@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 import { adminService, authService } from "@/lib/services";
 import { ROUTES, USER_ROLES } from "@/lib/constants";
@@ -7,9 +8,10 @@ import type { ApplicationStatus, CandidateTier } from "@/generated/prisma/enums"
 import { CandidatesFiltersBar } from "./_components/CandidatesFiltersBar";
 import { CandidatesTable } from "./_components/CandidatesTable";
 
-export const metadata: Metadata = {
-  title: "Candidates — SIORP Admin",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("admin.candidates.meta");
+  return { title: t("listTitle") };
+}
 
 const ADMIN_ROLES: readonly string[] = [USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN];
 const PAGE_SIZE = 25;
@@ -56,19 +58,19 @@ export default async function CandidatesPage({
     dateTo: params.dateTo || null,
   };
 
-  const [result, jobPosts] = await Promise.all([
+  const [result, jobPosts, t] = await Promise.all([
     adminService.getCandidates(filters, { page, pageSize: PAGE_SIZE }),
     adminService.getJobPostsSummary(),
+    getTranslations("admin.candidates.list"),
   ]);
 
   return (
     <div className="space-y-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Candidates</h1>
+          <h1 className="text-2xl font-bold">{t("heading")}</h1>
           <p className="text-muted-foreground text-sm">
-            {result.total.toLocaleString()} candidate
-            {result.total !== 1 ? "s" : ""} found
+            {t("countFound", { count: result.total })}
           </p>
         </div>
       </div>

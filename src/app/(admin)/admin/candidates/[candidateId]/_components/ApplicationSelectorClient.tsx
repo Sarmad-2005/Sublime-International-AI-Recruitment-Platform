@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter, usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 
 import {
@@ -24,6 +25,7 @@ export function ApplicationSelectorClient({
   applications: ApplicationOption[];
   selectedId: string;
 }) {
+  const t = useTranslations("admin.candidates.detail");
   const router = useRouter();
   const pathname = usePathname();
 
@@ -33,7 +35,7 @@ export function ApplicationSelectorClient({
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-muted-foreground text-sm">Viewing application:</span>
+      <span className="text-muted-foreground text-sm">{t("viewingApplication")}</span>
       <Select value={selectedId} onValueChange={handleChange}>
         <SelectTrigger className="h-8 w-64">
           <SelectValue />

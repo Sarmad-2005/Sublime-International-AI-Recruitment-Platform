@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { ShieldAlert } from "lucide-react";
 
@@ -58,6 +59,7 @@ export function TierOverrideModal({
   currentTier,
   candidateName,
 }: TierOverrideModalProps) {
+  const t = useTranslations("admin.candidates.tierModal");
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [tier, setTier] = useState<CandidateTier>(
@@ -73,7 +75,7 @@ export function TierOverrideModal({
     startTransition(async () => {
       const result = await overrideTierAction(applicationId, tier, reason);
       if (result.ok) {
-        toast.success(`Tier overridden to ${CANDIDATE_TIER_LABELS[tier]}`);
+        toast.success(t("successToast", { tier: CANDIDATE_TIER_LABELS[tier] }));
         setOpen(false);
         setReason("");
         router.refresh();
@@ -88,17 +90,17 @@ export function TierOverrideModal({
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <ShieldAlert className="size-4" />
-          Override Tier
+          {t("trigger")}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Override Tier — {candidateName}</DialogTitle>
+          <DialogTitle>{t("title", { name: candidateName })}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <Label>New Tier</Label>
+            <Label>{t("newTier")}</Label>
             <Select value={tier} onValueChange={(v) => setTier(v as CandidateTier)}>
               <SelectTrigger>
                 <SelectValue />
@@ -115,40 +117,38 @@ export function TierOverrideModal({
 
           <div className="space-y-1.5">
             <Label>
-              Reason{" "}
+              {t("reason")}{" "}
               <span className="text-muted-foreground font-normal">
-                (min {MIN_REASON} chars)
+                {t("reasonHint", { min: MIN_REASON })}
               </span>
             </Label>
             <Textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="Explain why the automated tier is being overridden…"
+              placeholder={t("reasonPlaceholder")}
               rows={3}
             />
             {reason.length > 0 && reasonShort && (
               <p className="text-xs text-red-500">
-                {MIN_REASON - reason.trim().length} more character
-                {MIN_REASON - reason.trim().length !== 1 ? "s" : ""} required
+                {t("charsRequired", { count: MIN_REASON - reason.trim().length })}
               </p>
             )}
           </div>
 
           <p className="text-muted-foreground rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs">
-            This action is logged. The original computed tier is preserved in the
-            audit trail.
+            {t("logNotice")}
           </p>
 
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancel
+              {t("cancel")}
             </Button>
             <Button
               onClick={handleSubmit}
               disabled={isPending || reasonShort}
               className={cn(isPending && "opacity-70")}
             >
-              {isPending ? "Applying…" : "Apply Override"}
+              {isPending ? t("applying") : t("apply")}
             </Button>
           </div>
         </div>

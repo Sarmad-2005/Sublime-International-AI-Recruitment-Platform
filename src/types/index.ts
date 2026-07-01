@@ -996,3 +996,122 @@ export interface AdminCandidateDetailView {
   applications: AdminApplicationSummary[];
   notes: AdminCandidateNote[];
 }
+
+// ---------------------------------------------------------------------------
+// Admin Job Post Management — SRS §3.2 FR-JOB-002/003
+// ---------------------------------------------------------------------------
+
+/** One row in the admin Jobs list table. */
+export interface AdminJobListItem {
+  id: string;
+  title: string;
+  sector: string;
+  clientId: string;
+  companyName: string;
+  vacancies: number;
+  applicationsCount: number;
+  status: JobPostStatus;
+  /** ISO timestamp or null. */
+  deadline: string | null;
+  /** ISO timestamp. */
+  createdAt: string;
+}
+
+export interface AdminJobFilters {
+  status: JobPostStatus | null;
+  sector: string | null;
+  clientId: string | null;
+}
+
+export type PaginatedJobs = Paginated<AdminJobListItem>;
+
+/** Full job data passed to the admin form (create or edit). */
+export interface AdminJobFormData {
+  // Section 1
+  title: string;
+  sector: string;
+  country: string;
+  city: string;
+  clientId: string;
+  vacancies: number;
+  status: "DRAFT" | "ACTIVE";
+
+  // Section 2
+  description: string;
+  requiredQualifications: string;
+  contractDurationMonths: number | null;
+  applicationDeadline: string | null;
+
+  // Section 3
+  salaryMin: number | null;
+  salaryMax: number | null;
+  benefits: string[];
+
+  // Section 5
+  assessmentWeight: number;
+  interviewWeight: number;
+  tierThresholds: TierThresholds | null;
+}
+
+/** Linked assessment summary shown in Section 4 of the job form. */
+export interface LinkedAssessmentInfo {
+  id: string;
+  title: string;
+  passingScore: number;
+  totalQuestions: number;
+  timeLimitMinutes: number;
+}
+
+/** Linked AI interview set summary shown in Section 4. */
+export interface LinkedInterviewSetInfo {
+  id: string;
+  title: string;
+  questionCount: number;
+  maxDurationMinutes: number;
+}
+
+/** Full job detail for the admin read view (job detail page). */
+export interface AdminJobDetailDTO {
+  id: string;
+  title: string;
+  sector: string;
+  companyName: string;
+  clientId: string;
+  country: string;
+  city: string | null;
+  vacancies: number;
+  description: string | null;
+  requiredQualifications: string | null;
+  contractDurationMonths: number | null;
+  applicationDeadline: string | null;
+  salaryMin: number | null;
+  salaryMax: number | null;
+  salaryCurrency: string;
+  benefits: string[];
+  status: JobPostStatus;
+  assessmentWeight: number;
+  interviewWeight: number;
+  tierThresholds: TierThresholds | null;
+  assessment: LinkedAssessmentInfo | null;
+  interviewSet: LinkedInterviewSetInfo | null;
+  /** ISO timestamp. */
+  createdAt: string;
+  publishedAt: string | null;
+}
+
+/** Pipeline funnel metrics for a single job post. */
+export interface JobPipelineStage {
+  status: string;
+  label: string;
+  count: number;
+}
+
+/** Metrics for a single job's detail page. */
+export interface JobMetrics {
+  totalApplications: number;
+  passedAssessment: number;
+  completedInterview: number;
+  shortlisted: number;
+  selected: number;
+  byStage: JobPipelineStage[];
+}

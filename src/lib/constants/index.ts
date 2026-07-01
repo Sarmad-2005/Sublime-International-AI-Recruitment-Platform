@@ -642,3 +642,30 @@ export const DEFAULT_AI_INTERVIEW_QUESTIONS = [
 // ---------------------------------------------------------------------------
 /** Primary labor corridor for Phase 1 (Pakistan → Saudi Arabia). */
 export const LABOR_CORRIDOR = { from: "PK", to: "SA" } as const;
+
+// ---------------------------------------------------------------------------
+// Job benefits — Section 3 of the admin Job Post form
+// ---------------------------------------------------------------------------
+export const JOB_BENEFITS = {
+  ACCOMMODATION: "ACCOMMODATION",
+  MEDICAL_INSURANCE: "MEDICAL_INSURANCE",
+  TRANSPORT: "TRANSPORT",
+  FOOD_ALLOWANCE: "FOOD_ALLOWANCE",
+  ANNUAL_LEAVE: "ANNUAL_LEAVE",
+  AIR_TICKET: "AIR_TICKET",
+} as const;
+
+export type JobBenefit = (typeof JOB_BENEFITS)[keyof typeof JOB_BENEFITS];
+export const JOB_BENEFIT_VALUES = Object.values(JOB_BENEFITS) as JobBenefit[];
+
+export const JOB_BENEFIT_LABELS: Record<JobBenefit, string> = {
+  ACCOMMODATION: "Accommodation",
+  MEDICAL_INSURANCE: "Medical Insurance",
+  TRANSPORT: "Transport",
+  FOOD_ALLOWANCE: "Food Allowance",
+  ANNUAL_LEAVE: "Annual Leave",
+  AIR_TICKET: "Air Ticket",
+};
+
+/** Admin page size for the jobs list. */
+export const JOBS_PAGE_SIZE = 25;

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { format } from "date-fns";
 import {
   ArrowLeft,
@@ -33,11 +34,14 @@ export async function generateMetadata({
   params: Promise<{ candidateId: string }>;
 }): Promise<Metadata> {
   const { candidateId } = await params;
-  const data = await adminService.getCandidateDetail(candidateId);
+  const [data, t] = await Promise.all([
+    adminService.getCandidateDetail(candidateId),
+    getTranslations("admin.candidates.meta"),
+  ]);
   return {
     title: data
-      ? `${data.candidate.fullName} — SIORP Admin`
-      : "Candidate — SIORP Admin",
+      ? t("detailTitle", { name: data.candidate.fullName })
+      : t("detailFallback"),
   };
 }
 
@@ -93,9 +97,10 @@ export default async function CandidateDetailPage({
   if (!user || !ADMIN_ROLES.includes(user.role)) redirect(ROUTES.LOGIN);
 
   const [{ candidateId }, sp] = await Promise.all([params, searchParams]);
-  const [data, saudiClients] = await Promise.all([
+  const [data, saudiClients, t] = await Promise.all([
     adminService.getCandidateDetail(candidateId),
     adminService.getSaudiClients(),
+    getTranslations("admin.candidates.detail"),
   ]);
 
   if (!data) notFound();
@@ -120,7 +125,7 @@ export default async function CandidateDetailPage({
         className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
       >
         <ArrowLeft className="size-4" />
-        Back to Candidates
+        {t("back")}
       </Link>
 
       {/* Header card */}
@@ -181,7 +186,7 @@ export default async function CandidateDetailPage({
         <Card>
           <CardContent>
             <p className="text-muted-foreground mb-3 text-xs font-semibold uppercase tracking-wider">
-              Pipeline Stage
+              {t("pipelineStage")}
             </p>
             <StageProgressBar status={selectedApp.status as ApplicationStatus} />
           </CardContent>
@@ -203,12 +208,12 @@ export default async function CandidateDetailPage({
       {/* Tabs */}
       <Tabs defaultValue="profile">
         <TabsList className="h-auto flex-wrap gap-1">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="assessment">Assessment</TabsTrigger>
-          <TabsTrigger value="interview">AI Interview</TabsTrigger>
-          <TabsTrigger value="tier">Tier</TabsTrigger>
+          <TabsTrigger value="profile">{t("tabs.profile")}</TabsTrigger>
+          <TabsTrigger value="assessment">{t("tabs.assessment")}</TabsTrigger>
+          <TabsTrigger value="interview">{t("tabs.interview")}</TabsTrigger>
+          <TabsTrigger value="tier">{t("tabs.tier")}</TabsTrigger>
           <TabsTrigger value="applications">
-            Applications
+            {t("tabs.applications")}
             {applications.length > 1 && (
               <span className="ml-1.5 rounded-full bg-muted px-1.5 py-0.5 text-[10px]">
                 {applications.length}
@@ -216,10 +221,10 @@ export default async function CandidateDetailPage({
             )}
           </TabsTrigger>
           {selectedApp?.postSelection && (
-            <TabsTrigger value="post-selection">Post-Selection</TabsTrigger>
+            <TabsTrigger value="post-selection">{t("tabs.postSelection")}</TabsTrigger>
           )}
           <TabsTrigger value="notes">
-            Notes
+            {t("tabs.notes")}
             {notes.length > 0 && (
               <span className="ml-1.5 rounded-full bg-muted px-1.5 py-0.5 text-[10px]">
                 {notes.length}
@@ -234,71 +239,71 @@ export default async function CandidateDetailPage({
             <Card>
               <CardContent>
                 <p className="text-muted-foreground mb-3 text-xs font-semibold uppercase tracking-wider">
-                  Personal Information
+                  {t("profile.personal")}
                 </p>
-                <InfoRow label="Full Name" value={candidate.fullName} />
-                <InfoRow label="Father's Name" value={candidate.fatherName} />
-                <InfoRow label="CNIC" value={candidate.cnic} />
-                <InfoRow label="Date of Birth" value={candidate.dateOfBirth} />
-                <InfoRow label="Gender" value={candidate.gender} />
-                <InfoRow label="Nationality" value={candidate.nationality} />
-                <InfoRow label="Marital Status" value={candidate.maritalStatus} />
-                <InfoRow label="Religion" value={candidate.religion} />
+                <InfoRow label={t("profile.fullName")} value={candidate.fullName} />
+                <InfoRow label={t("profile.fatherName")} value={candidate.fatherName} />
+                <InfoRow label={t("profile.cnic")} value={candidate.cnic} />
+                <InfoRow label={t("profile.dateOfBirth")} value={candidate.dateOfBirth} />
+                <InfoRow label={t("profile.gender")} value={candidate.gender} />
+                <InfoRow label={t("profile.nationality")} value={candidate.nationality} />
+                <InfoRow label={t("profile.maritalStatus")} value={candidate.maritalStatus} />
+                <InfoRow label={t("profile.religion")} value={candidate.religion} />
               </CardContent>
             </Card>
 
             <Card>
               <CardContent>
                 <p className="text-muted-foreground mb-3 text-xs font-semibold uppercase tracking-wider">
-                  Contact & Address
+                  {t("profile.contactAddress")}
                 </p>
-                <InfoRow label="Email" value={userEmail} />
-                <InfoRow label="Phone" value={userPhone} />
-                <InfoRow label="City" value={candidate.city} />
-                <InfoRow label="Province" value={candidate.province} />
-                <InfoRow label="Country" value={candidate.country} />
-                <InfoRow label="Permanent Address" value={candidate.permanentAddress} />
-                <InfoRow label="Current Address" value={candidate.currentAddress} />
-                <InfoRow label="Postal Code" value={candidate.postalCode} />
+                <InfoRow label={t("profile.email")} value={userEmail} />
+                <InfoRow label={t("profile.phone")} value={userPhone} />
+                <InfoRow label={t("profile.city")} value={candidate.city} />
+                <InfoRow label={t("profile.province")} value={candidate.province} />
+                <InfoRow label={t("profile.country")} value={candidate.country} />
+                <InfoRow label={t("profile.permanentAddress")} value={candidate.permanentAddress} />
+                <InfoRow label={t("profile.currentAddress")} value={candidate.currentAddress} />
+                <InfoRow label={t("profile.postalCode")} value={candidate.postalCode} />
               </CardContent>
             </Card>
 
             <Card>
               <CardContent>
                 <p className="text-muted-foreground mb-3 text-xs font-semibold uppercase tracking-wider">
-                  Passport
+                  {t("profile.passport")}
                 </p>
-                <InfoRow label="Passport Number" value={candidate.passportNumber} />
-                <InfoRow label="Issue Date" value={candidate.passportIssueDate} />
-                <InfoRow label="Expiry Date" value={candidate.passportExpiryDate} />
-                <InfoRow label="Issue Place" value={candidate.passportIssuePlace} />
+                <InfoRow label={t("profile.passportNumber")} value={candidate.passportNumber} />
+                <InfoRow label={t("profile.issueDate")} value={candidate.passportIssueDate} />
+                <InfoRow label={t("profile.expiryDate")} value={candidate.passportExpiryDate} />
+                <InfoRow label={t("profile.issuePlace")} value={candidate.passportIssuePlace} />
               </CardContent>
             </Card>
 
             <Card>
               <CardContent>
                 <p className="text-muted-foreground mb-3 text-xs font-semibold uppercase tracking-wider">
-                  Professional
+                  {t("profile.professional")}
                 </p>
-                <InfoRow label="Primary Trade" value={candidate.primaryTrade} />
-                <InfoRow label="Secondary Trade" value={candidate.secondaryTrade} />
+                <InfoRow label={t("profile.primaryTrade")} value={candidate.primaryTrade} />
+                <InfoRow label={t("profile.secondaryTrade")} value={candidate.secondaryTrade} />
                 <InfoRow
-                  label="Experience"
-                  value={`${candidate.yearsOfExperience} year${candidate.yearsOfExperience !== 1 ? "s" : ""}`}
+                  label={t("profile.experience")}
+                  value={t("profile.experienceYears", { years: candidate.yearsOfExperience })}
                 />
-                <InfoRow label="Education" value={candidate.educationLevel} />
+                <InfoRow label={t("profile.education")} value={candidate.educationLevel} />
               </CardContent>
             </Card>
 
             <Card>
               <CardContent>
                 <p className="text-muted-foreground mb-3 text-xs font-semibold uppercase tracking-wider">
-                  Emergency Contact
+                  {t("profile.emergencyContact")}
                 </p>
-                <InfoRow label="Name" value={candidate.emergencyContactName} />
-                <InfoRow label="Relation" value={candidate.emergencyContactRelation} />
-                <InfoRow label="Phone" value={candidate.emergencyContactPhone} />
-                <InfoRow label="Address" value={candidate.emergencyContactAddress} />
+                <InfoRow label={t("profile.name")} value={candidate.emergencyContactName} />
+                <InfoRow label={t("profile.relation")} value={candidate.emergencyContactRelation} />
+                <InfoRow label={t("profile.phone")} value={candidate.emergencyContactPhone} />
+                <InfoRow label={t("profile.address")} value={candidate.emergencyContactAddress} />
               </CardContent>
             </Card>
 
@@ -308,18 +313,18 @@ export default async function CandidateDetailPage({
                 <CardContent>
                   <div className="flex items-center justify-between mb-3">
                     <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">
-                      CV / Resume
+                      {t("profile.cv")}
                     </p>
                     <Button asChild variant="ghost" size="sm">
                       <a href={candidate.cvUrl} target="_blank" rel="noopener noreferrer">
                         <ExternalLink className="size-3.5" />
-                        Open in new tab
+                        {t("profile.openInNewTab")}
                       </a>
                     </Button>
                   </div>
                   <iframe
                     src={candidate.cvUrl}
-                    title="Candidate CV"
+                    title={t("profile.cvTitle")}
                     className="h-[600px] w-full rounded-md border"
                   />
                 </CardContent>
@@ -334,7 +339,7 @@ export default async function CandidateDetailPage({
             <Card>
               <CardContent>
                 <p className="text-muted-foreground py-8 text-center text-sm">
-                  No trade assessment attempt for this application.
+                  {t("assessment.none")}
                 </p>
               </CardContent>
             </Card>
@@ -343,10 +348,10 @@ export default async function CandidateDetailPage({
               <Card>
                 <CardContent>
                   <p className="text-muted-foreground mb-3 text-xs font-semibold uppercase tracking-wider">
-                    Assessment Result
+                    {t("assessment.result")}
                   </p>
                   <InfoRow
-                    label="Score"
+                    label={t("assessment.score")}
                     value={
                       selectedApp.assessment.score !== null
                         ? `${selectedApp.assessment.score.toFixed(1)}%`
@@ -354,7 +359,7 @@ export default async function CandidateDetailPage({
                     }
                   />
                   <InfoRow
-                    label="Result"
+                    label={t("assessment.resultLabel")}
                     value={
                       <span
                         className={cn(
@@ -364,12 +369,12 @@ export default async function CandidateDetailPage({
                             : "text-red-500",
                         )}
                       >
-                        {selectedApp.assessment.passed ? "Passed" : "Failed"}
+                        {selectedApp.assessment.passed ? t("assessment.passed") : t("assessment.failed")}
                       </span>
                     }
                   />
                   <InfoRow
-                    label="Submitted"
+                    label={t("assessment.submitted")}
                     value={
                       selectedApp.assessment.submittedAt
                         ? format(
@@ -385,14 +390,14 @@ export default async function CandidateDetailPage({
               <Card>
                 <CardContent>
                   <p className="text-muted-foreground mb-3 text-xs font-semibold uppercase tracking-wider">
-                    Integrity
+                    {t("assessment.integrity")}
                   </p>
                   <InfoRow
-                    label="Tab Switches"
+                    label={t("assessment.tabSwitches")}
                     value={String(selectedApp.assessment.tabSwitchCount)}
                   />
                   <InfoRow
-                    label="Flagged Suspicious"
+                    label={t("assessment.flaggedSuspicious")}
                     value={
                       <span
                         className={cn(
@@ -402,7 +407,7 @@ export default async function CandidateDetailPage({
                             : "text-emerald-600",
                         )}
                       >
-                        {selectedApp.assessment.flaggedSuspicious ? "Yes ⚠" : "No"}
+                        {selectedApp.assessment.flaggedSuspicious ? t("assessment.yes") : t("assessment.no")}
                       </span>
                     }
                   />
@@ -418,7 +423,7 @@ export default async function CandidateDetailPage({
             <Card>
               <CardContent>
                 <p className="text-muted-foreground py-8 text-center text-sm">
-                  No AI interview attempt for this application.
+                  {t("interview.none")}
                 </p>
               </CardContent>
             </Card>
@@ -428,26 +433,26 @@ export default async function CandidateDetailPage({
                 <Card>
                   <CardContent className="space-y-3">
                     <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">
-                      Score Breakdown
+                      {t("interview.scoreBreakdown")}
                     </p>
                     <ScoreBar
-                      label="Overall"
+                      label={t("interview.overall")}
                       score={selectedApp.interview.overallScore}
                     />
                     <ScoreBar
-                      label="Technical"
+                      label={t("interview.technical")}
                       score={selectedApp.interview.technicalScore}
                     />
                     <ScoreBar
-                      label="Communication"
+                      label={t("interview.communication")}
                       score={selectedApp.interview.communicationScore}
                     />
                     <ScoreBar
-                      label="Behavioral"
+                      label={t("interview.behavioral")}
                       score={selectedApp.interview.behavioralScore}
                     />
                     <ScoreBar
-                      label="Confidence"
+                      label={t("interview.confidence")}
                       score={selectedApp.interview.confidenceScore}
                     />
                   </CardContent>
@@ -456,7 +461,7 @@ export default async function CandidateDetailPage({
                 <Card>
                   <CardContent>
                     <p className="text-muted-foreground mb-3 text-xs font-semibold uppercase tracking-wider">
-                      AI Summary
+                      {t("interview.aiSummary")}
                     </p>
                     {selectedApp.interview.aiSummary ? (
                       <p className="text-sm leading-relaxed">
@@ -464,16 +469,16 @@ export default async function CandidateDetailPage({
                       </p>
                     ) : (
                       <p className="text-muted-foreground text-sm">
-                        No AI summary available.
+                        {t("interview.noSummary")}
                       </p>
                     )}
                     <div className="mt-4 space-y-1.5">
                       <InfoRow
-                        label="Status"
+                        label={t("interview.status")}
                         value={selectedApp.interview.status}
                       />
                       <InfoRow
-                        label="Completed"
+                        label={t("interview.completed")}
                         value={
                           selectedApp.interview.completedAt
                             ? format(
@@ -491,7 +496,7 @@ export default async function CandidateDetailPage({
               <Card>
                 <CardContent>
                   <p className="text-muted-foreground mb-3 text-xs font-semibold uppercase tracking-wider">
-                    Interview Recording
+                    {t("interview.recording")}
                   </p>
                   <InterviewRecordingPlayer
                     url={selectedApp.interview.recordingUrl}
@@ -508,7 +513,7 @@ export default async function CandidateDetailPage({
             <Card>
               <CardContent>
                 <p className="text-muted-foreground py-8 text-center text-sm">
-                  No tier record yet — candidate has not completed both stages.
+                  {t("tier.none")}
                 </p>
               </CardContent>
             </Card>
@@ -517,10 +522,10 @@ export default async function CandidateDetailPage({
               <Card>
                 <CardContent>
                   <p className="text-muted-foreground mb-3 text-xs font-semibold uppercase tracking-wider">
-                    Tier Assignment
+                    {t("tier.assignment")}
                   </p>
                   <InfoRow
-                    label="Tier"
+                    label={t("tier.tierLabel")}
                     value={
                       <Badge
                         variant="outline"
@@ -534,7 +539,7 @@ export default async function CandidateDetailPage({
                     }
                   />
                   <InfoRow
-                    label="Final Score"
+                    label={t("tier.finalScore")}
                     value={
                       selectedApp.tierRecord.finalScore !== null
                         ? `${selectedApp.tierRecord.finalScore.toFixed(2)}%`
@@ -542,23 +547,23 @@ export default async function CandidateDetailPage({
                     }
                   />
                   <InfoRow
-                    label="Admin Override"
+                    label={t("tier.adminOverride")}
                     value={
                       selectedApp.tierRecord.adminOverride ? (
-                        <span className="text-amber-600 font-semibold">Yes</span>
+                        <span className="text-amber-600 font-semibold">{t("tier.overrideYes")}</span>
                       ) : (
-                        "No"
+                        t("tier.overrideNo")
                       )
                     }
                   />
                   {selectedApp.tierRecord.adminOverride && (
                     <InfoRow
-                      label="Override Reason"
+                      label={t("tier.overrideReason")}
                       value={selectedApp.tierRecord.adminOverrideNote}
                     />
                   )}
                   <InfoRow
-                    label="Assigned"
+                    label={t("tier.assigned")}
                     value={
                       selectedApp.tierRecord.assignedAt
                         ? format(
@@ -574,20 +579,24 @@ export default async function CandidateDetailPage({
               <Card>
                 <CardContent>
                   <p className="text-muted-foreground mb-3 text-xs font-semibold uppercase tracking-wider">
-                    Score Calculation
+                    {t("tier.calculation")}
                   </p>
                   <div className="space-y-3">
                     <ScoreBar
-                      label={`Assessment (weight ${(selectedApp.tierRecord.assessmentWeight * 100).toFixed(0)}%)`}
+                      label={t("tier.assessmentWeight", {
+                        weight: (selectedApp.tierRecord.assessmentWeight * 100).toFixed(0),
+                      })}
                       score={selectedApp.tierRecord.assessmentScore}
                     />
                     <ScoreBar
-                      label={`AI Interview (weight ${(selectedApp.tierRecord.interviewWeight * 100).toFixed(0)}%)`}
+                      label={t("tier.interviewWeight", {
+                        weight: (selectedApp.tierRecord.interviewWeight * 100).toFixed(0),
+                      })}
                       score={selectedApp.tierRecord.interviewScore}
                     />
                     <div className="border-t pt-2">
                       <ScoreBar
-                        label="Weighted Final Score"
+                        label={t("tier.weightedFinal")}
                         score={selectedApp.tierRecord.finalScore}
                       />
                     </div>
@@ -613,7 +622,7 @@ export default async function CandidateDetailPage({
             <CardContent>
               {applications.length === 0 ? (
                 <p className="text-muted-foreground py-8 text-center text-sm">
-                  No applications found.
+                  {t("applications.empty")}
                 </p>
               ) : (
                 <div className="divide-y">
@@ -646,7 +655,7 @@ export default async function CandidateDetailPage({
                           </Badge>
                           {app.finalScore !== null && (
                             <span className="text-muted-foreground text-xs">
-                              Score: {app.finalScore.toFixed(1)}%
+                              {t("applications.score", { score: app.finalScore.toFixed(1) })}
                             </span>
                           )}
                         </div>
@@ -656,7 +665,7 @@ export default async function CandidateDetailPage({
                           href={`${ROUTES.ADMIN}/candidates/${candidateId}?applicationId=${app.id}`}
                         >
                           <FileText className="size-4" />
-                          View
+                          {t("applications.view")}
                         </Link>
                       </Button>
                     </div>
@@ -673,35 +682,35 @@ export default async function CandidateDetailPage({
             <Card>
               <CardContent>
                 <p className="text-muted-foreground mb-3 text-xs font-semibold uppercase tracking-wider">
-                  Deployment Milestones
+                  {t("postSelection.title")}
                 </p>
                 <div className="divide-y">
                   <InfoRow
-                    label="Offer Letter"
+                    label={t("postSelection.offerLetter")}
                     value={selectedApp.postSelection.offerLetterStatus}
                   />
                   <InfoRow
-                    label="GAMCA Medical"
+                    label={t("postSelection.gamca")}
                     value={selectedApp.postSelection.gamcaStatus}
                   />
                   <InfoRow
-                    label="Visa"
+                    label={t("postSelection.visa")}
                     value={selectedApp.postSelection.visaStatus}
                   />
                   <InfoRow
-                    label="Flight Ticket"
+                    label={t("postSelection.ticket")}
                     value={selectedApp.postSelection.ticketArrangement}
                   />
                   <InfoRow
-                    label="Pre-Departure Brief"
+                    label={t("postSelection.preDeparture")}
                     value={selectedApp.postSelection.preDepartureBriefStatus}
                   />
                   <InfoRow
-                    label="Arrival"
+                    label={t("postSelection.arrival")}
                     value={selectedApp.postSelection.arrivalStatus}
                   />
                   <InfoRow
-                    label="Probation"
+                    label={t("postSelection.probation")}
                     value={selectedApp.postSelection.probationStatus}
                   />
                 </div>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import {
   ChevronLeft,
@@ -99,12 +100,13 @@ const QUICK_STAGES: { label: string; value: ApplicationStatus }[] = [
 ];
 
 function MoveStageMenu({ applicationId }: { applicationId: string }) {
+  const t = useTranslations("admin.candidates.table");
   const router = useRouter();
 
   async function move(status: ApplicationStatus) {
     const result = await moveCandidateStageAction(applicationId, status);
     if (result.ok) {
-      toast.success(`Moved to ${APPLICATION_STATUS_LABELS[status]}`);
+      toast.success(t("movedTo", { stage: APPLICATION_STATUS_LABELS[status] }));
       router.refresh();
     } else {
       toast.error(result.error);
@@ -114,12 +116,12 @@ function MoveStageMenu({ applicationId }: { applicationId: string }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="size-8" title="Move Stage">
+        <Button variant="ghost" size="icon" className="size-8" title={t("moveStage")}>
           <MoveRight className="size-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuLabel>Move to Stage</DropdownMenuLabel>
+        <DropdownMenuLabel>{t("moveToStage")}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {QUICK_STAGES.map((s) => (
           <DropdownMenuItem key={s.value} onSelect={() => move(s.value)}>
@@ -151,6 +153,7 @@ interface CandidatesTableProps {
 }
 
 export function CandidatesTable({ data, page, basePath }: CandidatesTableProps) {
+  const t = useTranslations("admin.candidates.table");
   const router = useRouter();
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
@@ -186,7 +189,7 @@ export function CandidatesTable({ data, page, basePath }: CandidatesTableProps) 
       {selected.size > 0 && (
         <div className="bg-royal/5 border-royal/20 flex items-center gap-3 rounded-md border px-4 py-2">
           <span className="text-royal text-sm font-medium">
-            {selected.size} candidate{selected.size !== 1 ? "s" : ""} selected
+            {t("selectedCount", { count: selected.size })}
           </span>
           <PDFExportButton applicationIds={[...selected]} />
           <Button
@@ -195,7 +198,7 @@ export function CandidatesTable({ data, page, basePath }: CandidatesTableProps) 
             className="ml-auto"
             onClick={() => setSelected(new Set())}
           >
-            Clear
+            {t("clear")}
           </Button>
         </div>
       )}
@@ -210,18 +213,18 @@ export function CandidatesTable({ data, page, basePath }: CandidatesTableProps) 
                   checked={allChecked}
                   data-indeterminate={someChecked || undefined}
                   onCheckedChange={toggleAll}
-                  aria-label="Select all"
+                  aria-label={t("selectAll")}
                 />
               </th>
-              <th className="px-3 py-3 font-semibold">Candidate</th>
-              <th className="px-3 py-3 font-semibold">Job Applied For</th>
-              <th className="px-3 py-3 font-semibold">Applied</th>
-              <th className="px-3 py-3 font-semibold">Stage</th>
-              <th className="px-3 py-3 font-semibold">Tier</th>
-              <th className="px-3 py-3 text-center font-semibold">Assess.</th>
-              <th className="px-3 py-3 text-center font-semibold">Interview</th>
-              <th className="px-3 py-3 text-center font-semibold">Final</th>
-              <th className="px-3 py-3 text-right font-semibold">Actions</th>
+              <th className="px-3 py-3 font-semibold">{t("candidate")}</th>
+              <th className="px-3 py-3 font-semibold">{t("jobAppliedFor")}</th>
+              <th className="px-3 py-3 font-semibold">{t("applied")}</th>
+              <th className="px-3 py-3 font-semibold">{t("stage")}</th>
+              <th className="px-3 py-3 font-semibold">{t("tier")}</th>
+              <th className="px-3 py-3 text-center font-semibold">{t("assessmentShort")}</th>
+              <th className="px-3 py-3 text-center font-semibold">{t("interview")}</th>
+              <th className="px-3 py-3 text-center font-semibold">{t("final")}</th>
+              <th className="px-3 py-3 text-right font-semibold">{t("actions")}</th>
             </tr>
           </thead>
           <tbody className="divide-y">
@@ -231,7 +234,7 @@ export function CandidatesTable({ data, page, basePath }: CandidatesTableProps) 
                   colSpan={10}
                   className="text-muted-foreground px-4 py-12 text-center text-sm"
                 >
-                  No candidates match the current filters.
+                  {t("empty")}
                 </td>
               </tr>
             ) : (
@@ -252,9 +255,11 @@ export function CandidatesTable({ data, page, basePath }: CandidatesTableProps) 
       {data.totalPages > 1 && (
         <div className="flex items-center justify-between px-1">
           <p className="text-muted-foreground text-sm">
-            {((page - 1) * data.pageSize + 1).toLocaleString()}–
-            {Math.min(page * data.pageSize, data.total).toLocaleString()} of{" "}
-            {data.total.toLocaleString()} candidates
+            {t("rangeSummary", {
+              from: ((page - 1) * data.pageSize + 1).toLocaleString(),
+              to: Math.min(page * data.pageSize, data.total).toLocaleString(),
+              total: data.total.toLocaleString(),
+            })}
           </p>
           <div className="flex gap-1">
             <Button
@@ -298,6 +303,7 @@ function CandidateRow({
   selected: boolean;
   onToggle: () => void;
 }) {
+  const t = useTranslations("admin.candidates.table");
   const initials = row.fullName
     .split(" ")
     .map((p) => p[0])
@@ -316,7 +322,7 @@ function CandidateRow({
         <Checkbox
           checked={selected}
           onCheckedChange={onToggle}
-          aria-label={`Select ${row.fullName}`}
+          aria-label={t("selectRow", { name: row.fullName })}
         />
       </td>
 
@@ -338,7 +344,7 @@ function CandidateRow({
             </p>
           </div>
           {row.flaggedSuspicious && (
-            <span title="Suspicious assessment">
+            <span title={t("suspicious")}>
               <TriangleAlert className="size-3.5 shrink-0 text-amber-500" />
             </span>
           )}
@@ -373,7 +379,7 @@ function CandidateRow({
       {/* Assessment score */}
       <td className="px-3 py-2.5 text-center">
         {row.assessmentPassed === null ? (
-          <span className="text-muted-foreground text-xs">Pending</span>
+          <span className="text-muted-foreground text-xs">{t("pending")}</span>
         ) : (
           <span
             className={cn(
@@ -404,7 +410,7 @@ function CandidateRow({
             variant="ghost"
             size="icon"
             className="size-8"
-            title="View candidate"
+            title={t("viewCandidate")}
           >
             <Link href={`${ROUTES.ADMIN}/candidates/${row.candidateId}?applicationId=${row.applicationId}`}>
               <Eye className="size-4" />

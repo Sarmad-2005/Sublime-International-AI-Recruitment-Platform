@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { MessageSquarePlus } from "lucide-react";
 import { toast } from "sonner";
@@ -19,6 +20,7 @@ export function CandidateNotesPanel({
   candidateId,
   initialNotes,
 }: CandidateNotesPanelProps) {
+  const t = useTranslations("admin.candidates.notes");
   const [notes, setNotes] = useState<AdminCandidateNote[]>(initialNotes);
   const [text, setText] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -32,7 +34,7 @@ export function CandidateNotesPanel({
       if (result.ok) {
         setNotes((prev) => [result.data, ...prev]);
         setText("");
-        toast.success("Note added");
+        toast.success(t("addedToast"));
       } else {
         toast.error(result.error);
       }
@@ -46,12 +48,12 @@ export function CandidateNotesPanel({
         <Textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Add an internal admin note…"
+          placeholder={t("placeholder")}
           rows={3}
         />
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground text-xs">
-            Admin-only. Not visible to candidates or Saudi clients.
+            {t("adminOnly")}
           </span>
           <Button
             size="sm"
@@ -59,7 +61,7 @@ export function CandidateNotesPanel({
             disabled={isPending || text.trim().length < MIN_NOTE}
           >
             <MessageSquarePlus className="size-4" />
-            {isPending ? "Saving…" : "Add Note"}
+            {isPending ? t("saving") : t("add")}
           </Button>
         </div>
       </div>
@@ -68,7 +70,7 @@ export function CandidateNotesPanel({
       <div className="space-y-3">
         {notes.length === 0 ? (
           <p className="text-muted-foreground py-4 text-center text-sm">
-            No notes yet.
+            {t("empty")}
           </p>
         ) : (
           notes.map((note) => (
@@ -78,7 +80,10 @@ export function CandidateNotesPanel({
             >
               <p className="text-sm leading-relaxed whitespace-pre-wrap">{note.note}</p>
               <p className="text-muted-foreground text-xs">
-                {format(new Date(note.createdAt), "d MMM yyyy 'at' HH:mm")}
+                {t("at", {
+                  date: format(new Date(note.createdAt), "d MMM yyyy"),
+                  time: format(new Date(note.createdAt), "HH:mm"),
+                })}
               </p>
             </div>
           ))
