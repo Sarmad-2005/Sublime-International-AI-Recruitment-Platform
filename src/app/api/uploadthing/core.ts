@@ -24,6 +24,20 @@ async function candidateOnly() {
   return { userId: user.id };
 }
 
+const ADMIN_ROLES: readonly string[] = [
+  USER_ROLES.SUPER_ADMIN,
+  USER_ROLES.ADMIN,
+];
+
+/** Reject anyone who isn't a signed-in admin / recruiter. */
+async function adminOnly() {
+  const user = await authService.getCurrentUser();
+  if (!user || !ADMIN_ROLES.includes(user.role)) {
+    throw new UploadThingError("You must be signed in as an admin to upload.");
+  }
+  return { userId: user.id };
+}
+
 const DOCX_MIME =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
@@ -53,6 +67,18 @@ export const candidateFileRouter = {
     "application/pdf": { maxFileSize: "8MB", maxFileCount: 1 },
   })
     .middleware(candidateOnly)
+    .onUploadComplete(({ metadata, file }) => {
+      return { uploadedBy: metadata.userId, url: file.ufsUrl };
+    }),
+
+  /**
+   * Assessment question / answer-option image (admin-authored). Used by the
+   * question-bank editor for image-based questions and picture answer options.
+   */
+  assessmentImage: f({
+    image: { maxFileSize: "4MB", maxFileCount: 1 },
+  })
+    .middleware(adminOnly)
     .onUploadComplete(({ metadata, file }) => {
       return { uploadedBy: metadata.userId, url: file.ufsUrl };
     }),

@@ -554,6 +554,31 @@ export const QUESTION_TYPE_LABELS: Record<string, string> = {
   IMAGE_BASED: "Image-based",
 };
 
+/** The four assessment question types (Prisma `QuestionType`) in display order. */
+export const QUESTION_TYPE_VALUES = [
+  "MCQ",
+  "MULTI_SELECT",
+  "SCENARIO",
+  "IMAGE_BASED",
+] as const;
+
+export type QuestionTypeValue = (typeof QUESTION_TYPE_VALUES)[number];
+
+/** Question types that accept exactly one correct answer (radio, not checkbox). */
+export const SINGLE_ANSWER_QUESTION_TYPES: readonly QuestionTypeValue[] = [
+  "MCQ",
+  "SCENARIO",
+  "IMAGE_BASED",
+];
+
+/** Max answer options allowed per question — SRS §3.4 question builder. */
+export const MAX_ANSWER_OPTIONS = 6;
+/** Min answer options required per question. */
+export const MIN_ANSWER_OPTIONS = 2;
+
+/** Admin page size for the question-bank and interview-set lists. */
+export const QUESTION_BANKS_PAGE_SIZE = 25;
+
 // ---------------------------------------------------------------------------
 // AI Interview — Stage 2 (SRS §3.5 M5)
 // ---------------------------------------------------------------------------
@@ -579,6 +604,17 @@ export const AI_INTERVIEW_QUESTION_TYPE_LABELS: Record<string, string> = {
   COMMUNICATION: "Communication",
   MOTIVATION: "Motivation",
 };
+
+/** The four AI-interview question categories (Prisma `AIInterviewQuestionType`). */
+export const AI_INTERVIEW_QUESTION_TYPE_VALUES = [
+  "TECHNICAL",
+  "BEHAVIORAL",
+  "COMMUNICATION",
+  "MOTIVATION",
+] as const;
+
+export type AIInterviewQuestionTypeValue =
+  (typeof AI_INTERVIEW_QUESTION_TYPE_VALUES)[number];
 
 /** Gemini's hiring recommendation (SRS §3.5.3 FR-AI-009). */
 export const AI_INTERVIEW_RECOMMENDATIONS = {

@@ -10,3 +10,4 @@ export * from "./job.schemas";
 export * from "./application.schemas";
 export * from "./assessment.schemas";
 export * from "./interview.schemas";
+export * from "./questionBank.schemas";

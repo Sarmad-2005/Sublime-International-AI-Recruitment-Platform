@@ -236,6 +236,7 @@ export interface Paginated<T> {
 // Candidate portal — profile DTO & dashboard (SRS §3.3, §3.7)
 // ---------------------------------------------------------------------------
 import type {
+  AIInterviewQuestionType,
   ApplicationStatus,
   EducationLevel as PrismaEducationLevel,
   Gender as PrismaGender,
@@ -690,6 +691,133 @@ export interface TabSwitchResult {
   count: number;
   /** True once the threshold is reached and the attempt must auto-submit. */
   autoSubmit: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Question Bank management (admin — SRS §3.4 M4)
+// ---------------------------------------------------------------------------
+
+/** One answer option as authored/stored (admin view). */
+export interface AdminQuestionOption {
+  id: string;
+  text: string;
+  imageUrl: string | null;
+}
+
+/**
+ * A full question as seen by the admin editor — unlike `AssessmentQuestionDTO`
+ * this *includes* the correct-answer ids, since only staff see it.
+ */
+export interface AdminQuestion {
+  id: string;
+  type: QuestionType;
+  questionText: string;
+  imageUrl: string | null;
+  options: AdminQuestionOption[];
+  /** Ids of the option(s) marked correct. */
+  correctAnswers: string[];
+  points: number;
+  orderIndex: number;
+}
+
+/** Editable settings for a question bank (Trade Assessment). */
+export interface QuestionBankSettings {
+  title: string;
+  description: string | null;
+  timeLimitMinutes: number;
+  passingScore: number;
+  allowRetake: boolean;
+  retakeCooldownDays: number;
+  randomizeQuestions: boolean;
+  randomizeAnswers: boolean;
+  isActive: boolean;
+}
+
+/** A row in the question-banks list. */
+export interface QuestionBankListItem {
+  id: string;
+  title: string;
+  jobPostId: string;
+  jobTitle: string;
+  companyName: string;
+  totalQuestions: number;
+  passingScore: number;
+  isActive: boolean;
+  /** ISO timestamp. */
+  updatedAt: string;
+}
+
+/** Full detail for the bank editor. */
+export interface QuestionBankDetail extends QuestionBankSettings {
+  id: string;
+  jobPostId: string;
+  jobTitle: string;
+  companyName: string;
+  totalQuestions: number;
+  questions: AdminQuestion[];
+  /** ISO timestamp. */
+  updatedAt: string;
+}
+
+/** A job post available to link a new bank / interview set to (none yet). */
+export interface LinkableJob {
+  id: string;
+  title: string;
+  companyName: string;
+}
+
+/** Result of a CSV bulk import. */
+export interface ImportResult {
+  imported: number;
+  failed: number;
+  errors: Array<{ row: number; message: string }>;
+}
+
+// ---------------------------------------------------------------------------
+// AI Interview Set management (admin — SRS §3.5 M5)
+// ---------------------------------------------------------------------------
+
+/** A full AI-interview question as seen by the admin editor. */
+export interface AdminInterviewQuestion {
+  id: string;
+  questionText: string;
+  questionType: AIInterviewQuestionType;
+  expectedKeywords: string[];
+  maxTimeSeconds: number;
+  orderIndex: number;
+}
+
+/** Editable settings for an AI interview set. */
+export interface InterviewSetSettings {
+  title: string;
+  description: string | null;
+  maxDurationMinutes: number;
+  questionTimeLimitSeconds: number;
+  isActive: boolean;
+}
+
+/** A row in the interview-sets list. */
+export interface InterviewSetListItem {
+  id: string;
+  title: string;
+  jobPostId: string;
+  jobTitle: string;
+  companyName: string;
+  questionCount: number;
+  maxDurationMinutes: number;
+  /** ISO timestamp. */
+  updatedAt: string;
+}
+
+/** Full detail for the interview-set editor. */
+export interface InterviewSetDetail extends InterviewSetSettings {
+  id: string;
+  jobPostId: string;
+  jobTitle: string;
+  companyName: string;
+  questions: AdminInterviewQuestion[];
+  /** ISO timestamp. */
+  updatedAt: string;
 }
 
 /** Response of `POST /api/assessment/[id]/start`. */
