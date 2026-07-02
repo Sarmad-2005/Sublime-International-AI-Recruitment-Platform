@@ -38,6 +38,15 @@ async function adminOnly() {
   return { userId: user.id };
 }
 
+/** Reject anyone who isn't a signed-in Saudi client. */
+async function saudiClientOnly() {
+  const user = await authService.getCurrentUser();
+  if (!user || user.role !== USER_ROLES.SAUDI_CLIENT) {
+    throw new UploadThingError("You must be signed in as a client to upload.");
+  }
+  return { userId: user.id };
+}
+
 const DOCX_MIME =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
@@ -81,6 +90,20 @@ export const candidateFileRouter = {
     .middleware(adminOnly)
     .onUploadComplete(({ metadata, file }) => {
       return { uploadedBy: metadata.userId, url: file.ufsUrl };
+    }),
+
+  /**
+   * Document attachment on a client ↔ team message (SRS M11). Documents only
+   * (PDF / DOCX / images), max 10 MB — client-gated.
+   */
+  clientMessageAttachment: f({
+    "application/pdf": { maxFileSize: "16MB", maxFileCount: 1 },
+    [DOCX_MIME]: { maxFileSize: "16MB", maxFileCount: 1 },
+    image: { maxFileSize: "16MB", maxFileCount: 1 },
+  })
+    .middleware(saudiClientOnly)
+    .onUploadComplete(({ metadata, file }) => {
+      return { uploadedBy: metadata.userId, url: file.ufsUrl, name: file.name };
     }),
 } satisfies FileRouter;
 

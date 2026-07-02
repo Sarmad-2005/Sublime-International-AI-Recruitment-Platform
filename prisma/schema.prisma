@@ -785,6 +785,9 @@ model Message {
   senderId   String    @map("sender_id") @db.Uuid
   receiverId String    @map("receiver_id") @db.Uuid
   content    String
+  // Optional document attachment (client ↔ admin) — SRS M11.
+  attachmentUrl  String? @map("attachment_url")
+  attachmentName String? @map("attachment_name")
   isRead     Boolean   @default(false) @map("is_read")
   sentAt     DateTime  @default(now()) @map("sent_at")
   readAt     DateTime? @map("read_at")

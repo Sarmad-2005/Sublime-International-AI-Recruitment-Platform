@@ -1243,3 +1243,180 @@ export interface JobMetrics {
   selected: number;
   byStage: JobPipelineStage[];
 }
+
+// ---------------------------------------------------------------------------
+// Saudi Client Portal — SRS §3.8 M7 (client-facing reads/writes)
+// ---------------------------------------------------------------------------
+
+/** The Saudi client's own company/contact identity (portal chrome + header). */
+export interface ClientProfileDTO {
+  id: string;
+  userId: string;
+  companyName: string;
+  companyRegNumber: string | null;
+  country: string;
+  city: string;
+  address: string | null;
+  contactName: string;
+  designation: string | null;
+  contactPhone: string | null;
+  website: string | null;
+  logoUrl: string | null;
+  email: string;
+}
+
+/** Headline counts across a client's whole candidate pool. */
+export interface ClientPoolSummary {
+  total: number;
+  interested: number;
+  shortlisted: number;
+  selected: number;
+}
+
+/** An upcoming scheduled live interview shown on the client dashboard. */
+export interface ClientUpcomingInterview {
+  id: string;
+  applicationId: string;
+  candidateName: string;
+  jobTitle: string;
+  /** ISO timestamp. */
+  scheduledAt: string;
+  durationMinutes: number;
+}
+
+/** The most recent message from the Sublime International team. */
+export interface ClientLatestMessage {
+  id: string;
+  content: string;
+  /** ISO timestamp. */
+  sentAt: string;
+  /** True when the admin/team sent it (i.e. it is inbound to the client). */
+  fromAdmin: boolean;
+}
+
+/** Everything the client dashboard server component renders. */
+export interface ClientDashboard {
+  companyName: string;
+  contactName: string;
+  logoUrl: string | null;
+  summary: ClientPoolSummary;
+  /** New candidates added to the pool since the client's previous login. */
+  newSinceLastLogin: number;
+  upcomingInterviews: ClientUpcomingInterview[];
+  latestMessage: ClientLatestMessage | null;
+  unreadMessages: number;
+}
+
+/** A single candidate card in the client's Talent Pool grid. */
+export interface ClientPoolCandidate {
+  applicationId: string;
+  fullName: string;
+  profilePhotoUrl: string | null;
+  tier: CandidateTier;
+  finalScore: number | null;
+  primaryTrade: string;
+  yearsOfExperience: number;
+  /** 0–100 or null when no attempt exists. */
+  assessmentScore: number | null;
+  interviewScore: number | null;
+  clientStatus: ClientReviewStatusValue;
+  jobTitle: string;
+  /** ISO timestamp the candidate was added to the pool. */
+  addedAt: string;
+}
+
+/** Client-review states surfaced by the portal (mirrors the Prisma enum). */
+export type ClientReviewStatusValue =
+  | "UNREVIEWED"
+  | "INTERESTED"
+  | "NOT_INTERESTED"
+  | "SHORTLISTED_FOR_INTERVIEW";
+
+/** Parsed, validated Talent Pool query (from URL searchParams). */
+export interface ClientPoolFilters {
+  jobPostId: string | null;
+  tier: CandidateTier | null;
+  status: ClientReviewStatusValue | null;
+  q: string | null;
+  page: number;
+}
+
+/** A job position the client has requested (Talent Pool filter facet). */
+export interface ClientJobPosition {
+  id: string;
+  title: string;
+}
+
+/** Paginated Talent Pool payload returned by the service. */
+export interface PaginatedClientPool {
+  items: ClientPoolCandidate[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+  /** Distinct job positions in this client's pool (filter facet). */
+  positions: ClientJobPosition[];
+}
+
+/** The four AI-interview sub-scores for the client profile breakdown. */
+export interface ClientCandidateScores {
+  technical: number | null;
+  communication: number | null;
+  behavioral: number | null;
+  confidence: number | null;
+  overall: number | null;
+}
+
+/**
+ * A candidate profile as the CLIENT sees it — deliberately reduced (no contact
+ * details, CNIC, passport or address). SRS §3.8 FR-CLIENT-003.
+ */
+export interface ClientCandidateView {
+  applicationId: string;
+  fullName: string;
+  profilePhotoUrl: string | null;
+  tier: CandidateTier;
+  finalScore: number | null;
+  clientStatus: ClientReviewStatusValue;
+  jobTitle: string;
+  companyName: string;
+
+  // Qualifications (no PII).
+  educationLevel: PrismaEducationLevel;
+  primaryTrade: string;
+  secondaryTrade: string | null;
+  yearsOfExperience: number;
+  nationality: string;
+
+  // AI interview.
+  /** Time-limited signed URL (6-hour expiry), or null when no recording. */
+  recordingUrl: string | null;
+  aiSummary: string | null;
+  scores: ClientCandidateScores;
+
+  // Stage-1 assessment highlight.
+  assessmentScore: number | null;
+  assessmentPassed: boolean | null;
+}
+
+/** One message in a client ↔ admin thread. */
+export interface ClientMessageDTO {
+  id: string;
+  content: string;
+  attachmentUrl: string | null;
+  attachmentName: string | null;
+  senderId: string;
+  /** True when the signed-in client sent it (render on the right). */
+  fromClient: boolean;
+  isRead: boolean;
+  /** ISO timestamp. */
+  sentAt: string;
+}
+
+/** The client ↔ admin conversation payload. */
+export interface ClientMessageThread {
+  /** The admin/team counterpart id (receiver for client-sent messages). */
+  adminId: string | null;
+  clientUserId: string;
+  messages: ClientMessageDTO[];
+}

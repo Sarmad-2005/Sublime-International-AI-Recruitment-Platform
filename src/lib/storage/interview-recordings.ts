@@ -36,13 +36,23 @@ async function ensureBucket(): Promise<void> {
   bucketEnsured = true;
 }
 
-/** Sign an object path for temporary read access (null on failure). */
-export async function signedUrl(path: string): Promise<string | null> {
+/**
+ * Sign an object path for temporary read access (null on failure). Pass a
+ * custom `ttlSeconds` for shorter-lived links — e.g. client recording previews
+ * use a 6-hour expiry (SRS §3.8 FR-CLIENT-004).
+ */
+export async function signedUrl(
+  path: string,
+  ttlSeconds: number = SIGNED_URL_TTL_SECONDS,
+): Promise<string | null> {
   const { data } = await admin()
     .storage.from(BUCKET)
-    .createSignedUrl(path, SIGNED_URL_TTL_SECONDS);
+    .createSignedUrl(path, ttlSeconds);
   return data?.signedUrl ?? null;
 }
+
+/** Signed-URL lifetime for a client recording preview — 6 hours. */
+export const CLIENT_RECORDING_TTL_SECONDS = 60 * 60 * 6;
 
 interface DataUrl {
   contentType: string;

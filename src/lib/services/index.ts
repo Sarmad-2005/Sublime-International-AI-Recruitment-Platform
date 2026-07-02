@@ -19,3 +19,4 @@ export * as interviewService from "./interview.service";
 export * as tierService from "./tier.service";
 export * as jobPostService from "./jobPost.service";
 export * as questionBankService from "./questionBank.service";
+export * as clientPortalService from "./clientPortal.service";
