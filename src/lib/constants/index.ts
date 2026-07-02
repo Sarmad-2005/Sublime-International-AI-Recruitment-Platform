@@ -38,6 +38,16 @@ export const USER_ROLE_LABELS: Record<UserRole, string> = {
   MEDICAL_OFFICER: "Medical Officer",
 };
 
+/**
+ * Roles permitted to use the admin portal (Super Admin + Admin/Recruiter).
+ * Shared by admin pages, layouts and server actions so the guard list has a
+ * single source of truth (Rule #1).
+ */
+export const ADMIN_ROLES: readonly string[] = [
+  USER_ROLES.SUPER_ADMIN,
+  USER_ROLES.ADMIN,
+];
+
 /** Session inactivity timeout per role family — SRS §3.1.3 FR-AUTH-012. */
 export const SESSION_TIMEOUT_HOURS = {
   CANDIDATE: 24,

@@ -3,13 +3,10 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 
 import { authService, candidateService } from "@/lib/services";
-import { ROUTES, USER_ROLES } from "@/lib/constants";
+import { ROUTES, ADMIN_ROLES } from "@/lib/constants";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { AdminShell } from "@/components/admin";
-
-/** Roles allowed inside the admin portal (defence in depth with the middleware). */
-const ADMIN_ROLES: readonly string[] = [USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN];
 
 /**
  * Admin portal layout.

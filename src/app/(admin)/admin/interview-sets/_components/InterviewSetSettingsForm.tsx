@@ -22,7 +22,7 @@ export function InterviewSetSettingsForm({ set }: { set: InterviewSetDetail }) {
   });
   const [saving, setSaving] = useState(false);
 
-  function set_<K extends keyof InterviewSetSettings>(
+  function updateField<K extends keyof InterviewSetSettings>(
     key: K,
     value: InterviewSetSettings[K],
   ) {
@@ -50,14 +50,14 @@ export function InterviewSetSettingsForm({ set }: { set: InterviewSetDetail }) {
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <Label className="mb-1 block text-sm">Name</Label>
-          <Input value={settings.title} onChange={(e) => set_("title", e.target.value)} />
+          <Input value={settings.title} onChange={(e) => updateField("title", e.target.value)} />
         </div>
 
         <div className="sm:col-span-2">
           <Label className="mb-1 block text-sm">Description</Label>
           <Textarea
             value={settings.description ?? ""}
-            onChange={(e) => set_("description", e.target.value || null)}
+            onChange={(e) => updateField("description", e.target.value || null)}
             placeholder="Optional notes about this interview set…"
             rows={2}
           />
@@ -70,7 +70,7 @@ export function InterviewSetSettingsForm({ set }: { set: InterviewSetDetail }) {
             min={1}
             max={180}
             value={settings.maxDurationMinutes}
-            onChange={(e) => set_("maxDurationMinutes", Number(e.target.value) || 1)}
+            onChange={(e) => updateField("maxDurationMinutes", Number(e.target.value) || 1)}
           />
         </div>
 
@@ -81,7 +81,7 @@ export function InterviewSetSettingsForm({ set }: { set: InterviewSetDetail }) {
             min={15}
             max={600}
             value={settings.questionTimeLimitSeconds}
-            onChange={(e) => set_("questionTimeLimitSeconds", Number(e.target.value) || 15)}
+            onChange={(e) => updateField("questionTimeLimitSeconds", Number(e.target.value) || 15)}
           />
         </div>
       </div>
@@ -89,7 +89,7 @@ export function InterviewSetSettingsForm({ set }: { set: InterviewSetDetail }) {
       <label className="flex cursor-pointer items-center gap-2.5 text-sm">
         <Checkbox
           checked={settings.isActive}
-          onCheckedChange={(c) => set_("isActive", c === true)}
+          onCheckedChange={(c) => updateField("isActive", c === true)}
         />
         Active (used for the AI interview of the linked job)
       </label>

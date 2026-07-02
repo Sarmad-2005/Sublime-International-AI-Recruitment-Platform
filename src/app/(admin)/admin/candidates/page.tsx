@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import { adminService, authService } from "@/lib/services";
-import { ROUTES, USER_ROLES } from "@/lib/constants";
+import { ROUTES, ADMIN_ROLES } from "@/lib/constants";
 import type { ApplicationStatus, CandidateTier } from "@/generated/prisma/enums";
 import { CandidatesFiltersBar } from "./_components/CandidatesFiltersBar";
 import { CandidatesTable } from "./_components/CandidatesTable";
@@ -13,7 +13,6 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("listTitle") };
 }
 
-const ADMIN_ROLES: readonly string[] = [USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN];
 const PAGE_SIZE = 25;
 
 interface PageSearchParams {

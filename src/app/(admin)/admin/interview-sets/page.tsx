@@ -2,13 +2,11 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { authService, questionBankService } from "@/lib/services";
-import { ROUTES, USER_ROLES } from "@/lib/constants";
+import { ROUTES, ADMIN_ROLES } from "@/lib/constants";
 import { InterviewSetsTable } from "./_components/InterviewSetsTable";
 import { CreateInterviewSetDialog } from "./_components/CreateInterviewSetDialog";
 
 export const metadata: Metadata = { title: "AI Interview Sets — SIORP Admin" };
-
-const ADMIN_ROLES: readonly string[] = [USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN];
 
 export default async function InterviewSetsPage() {
   const user = await authService.getCurrentUser();

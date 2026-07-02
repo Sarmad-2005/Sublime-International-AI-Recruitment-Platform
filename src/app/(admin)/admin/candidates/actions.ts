@@ -2,24 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 
-import { adminService, authService } from "@/lib/services";
-import { ROUTES, USER_ROLES } from "@/lib/constants";
+import { adminService } from "@/lib/services";
+import { ROUTES } from "@/lib/constants";
 import type { CandidateTier } from "@/lib/constants";
+import { requireAdmin, type ActionResult } from "@/lib/auth/admin-guard";
 import type { ApplicationStatus } from "@/generated/prisma/enums";
-
-const ADMIN_ROLES: readonly string[] = [USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN];
-
-async function requireAdmin() {
-  const user = await authService.getCurrentUser();
-  if (!user || !ADMIN_ROLES.includes(user.role)) {
-    throw new Error("Unauthorized");
-  }
-  return user;
-}
-
-export type ActionResult<T = void> =
-  | { ok: true; data: T }
-  | { ok: false; error: string };
 
 export async function overrideTierAction(
   applicationId: string,
@@ -90,8 +77,11 @@ export async function exportCandidatesPDFAction(applicationIds: string[]) {
       "@/components/admin/candidate/PDFExport"
     );
     const React = await import("react");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const element = React.createElement(CandidatePDFDocument, { candidates: data }) as any;
+    // @react-pdf/renderer types the root as ReactElement<DocumentProps>; derive
+    // that from the function signature so there is no `any` and no drift.
+    const element = React.createElement(CandidatePDFDocument, {
+      candidates: data,
+    }) as Parameters<typeof renderToBuffer>[0];
     const buffer = await renderToBuffer(element);
     return { ok: true as const, base64: buffer.toString("base64") };
   } catch (e) {

@@ -4,14 +4,12 @@ import { notFound, redirect } from "next/navigation";
 import { ChevronLeft, ExternalLink } from "lucide-react";
 
 import { authService, questionBankService } from "@/lib/services";
-import { ROUTES, USER_ROLES } from "@/lib/constants";
+import { ROUTES, ADMIN_ROLES } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { InterviewSetSettingsForm } from "../_components/InterviewSetSettingsForm";
 import { InterviewQuestionListEditor } from "../_components/InterviewQuestionListEditor";
 
 export const metadata: Metadata = { title: "AI Interview Set — SIORP Admin" };
-
-const ADMIN_ROLES: readonly string[] = [USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN];
 
 export default async function InterviewSetEditorPage({
   params,

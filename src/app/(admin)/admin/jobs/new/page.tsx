@@ -4,13 +4,11 @@ import { redirect } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 
 import { authService, jobPostService } from "@/lib/services";
-import { ROUTES, USER_ROLES } from "@/lib/constants";
+import { ROUTES, ADMIN_ROLES } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { JobForm } from "@/components/admin/jobs";
 
 export const metadata: Metadata = { title: "Create Job Post — SIORP Admin" };
-
-const ADMIN_ROLES: readonly string[] = [USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN];
 
 export default async function NewJobPage() {
   const user = await authService.getCurrentUser();

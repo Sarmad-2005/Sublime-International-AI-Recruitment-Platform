@@ -11,6 +11,7 @@ import {
   SINGLE_ANSWER_QUESTION_TYPES,
   type QuestionTypeValue,
 } from "@/lib/constants";
+import { randomId } from "@/lib/utils/id";
 import {
   assessmentQuestionSchema,
   type AssessmentQuestionInput,
@@ -41,11 +42,7 @@ interface QuestionEditorProps {
 }
 
 function blankOption(): AdminQuestionOption {
-  const id =
-    typeof crypto !== "undefined" && "randomUUID" in crypto
-      ? crypto.randomUUID()
-      : `opt-${Math.random().toString(36).slice(2)}`;
-  return { id, text: "", imageUrl: null };
+  return { id: randomId("opt"), text: "", imageUrl: null };
 }
 
 /** Full inline create/edit form for a single assessment question. */

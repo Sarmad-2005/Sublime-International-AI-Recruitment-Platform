@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 
 import { adminService, authService } from "@/lib/services";
-import { ROUTES, USER_ROLES, CANDIDATE_TIER_LABELS, APPLICATION_STATUS_LABELS } from "@/lib/constants";
+import { ROUTES, ADMIN_ROLES, CANDIDATE_TIER_LABELS, APPLICATION_STATUS_LABELS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import type { ApplicationStatus } from "@/generated/prisma/enums";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -44,8 +44,6 @@ export async function generateMetadata({
       : t("detailFallback"),
   };
 }
-
-const ADMIN_ROLES: readonly string[] = [USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN];
 
 const TIER_BADGE: Record<string, string> = {
   DIAMOND: "bg-cyan-50 text-cyan-700 border-cyan-200",

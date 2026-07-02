@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { Briefcase, PlaneTakeoff, UserCheck, Users } from "lucide-react";
 
 import { adminService, authService } from "@/lib/services";
-import { ROUTES, USER_ROLES } from "@/lib/constants";
+import { ROUTES, ADMIN_ROLES } from "@/lib/constants";
 import {
   ActivityFeed,
   MetricCard,
@@ -16,8 +16,6 @@ import {
 export const metadata: Metadata = {
   title: "Dashboard — SIORP Admin",
 };
-
-const ADMIN_ROLES: readonly string[] = [USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN];
 
 /**
  * Admin dashboard (Server Component). Every metric is fetched on the server in

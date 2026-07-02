@@ -2,24 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 
-import { authService, jobPostService } from "@/lib/services";
-import { ROUTES, USER_ROLES } from "@/lib/constants";
+import { jobPostService } from "@/lib/services";
+import { ROUTES } from "@/lib/constants";
 import type { JobPostStatus } from "@/lib/constants";
+import { requireAdmin, type ActionResult } from "@/lib/auth/admin-guard";
 import type { AdminJobFormData } from "@/types";
-
-const ADMIN_ROLES: readonly string[] = [USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN];
-
-async function requireAdmin() {
-  const user = await authService.getCurrentUser();
-  if (!user || !ADMIN_ROLES.includes(user.role)) {
-    throw new Error("Unauthorized");
-  }
-  return user;
-}
-
-export type ActionResult<T = void> =
-  | { ok: true; data: T }
-  | { ok: false; error: string };
 
 export async function createJobPostAction(
   data: AdminJobFormData,

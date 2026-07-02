@@ -2,13 +2,11 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { authService, questionBankService } from "@/lib/services";
-import { ROUTES, USER_ROLES } from "@/lib/constants";
+import { ROUTES, ADMIN_ROLES } from "@/lib/constants";
 import { QuestionBanksTable } from "./_components/QuestionBanksTable";
 import { CreateBankDialog } from "./_components/CreateBankDialog";
 
 export const metadata: Metadata = { title: "Question Banks — SIORP Admin" };
-
-const ADMIN_ROLES: readonly string[] = [USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN];
 
 export default async function QuestionBanksPage() {
   const user = await authService.getCurrentUser();

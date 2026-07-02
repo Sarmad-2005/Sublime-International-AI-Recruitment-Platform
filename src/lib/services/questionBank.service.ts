@@ -4,11 +4,14 @@ import { randomUUID } from "node:crypto";
 
 import { prisma, Prisma } from "@/lib/prisma";
 import { SINGLE_ANSWER_QUESTION_TYPES } from "@/lib/constants";
+import {
+  parseQuestionOptions,
+  parseJsonStringArray,
+} from "@/lib/utils/questionJson";
 import type { QuestionType } from "@/generated/prisma/enums";
 import type {
   AdminInterviewQuestion,
   AdminQuestion,
-  AdminQuestionOption,
   ImportResult,
   InterviewSetDetail,
   InterviewSetListItem,
@@ -48,30 +51,8 @@ export class QuestionBankError extends Error {
 
 // ---------------------------------------------------------------------------
 // JSON (de)serialisation — `options` / `correctAnswers` are opaque JSON columns.
+// Parsers are shared with the candidate assessment service (@/lib/utils/questionJson).
 // ---------------------------------------------------------------------------
-
-function parseOptions(value: Prisma.JsonValue): AdminQuestionOption[] {
-  if (!Array.isArray(value)) return [];
-  const out: AdminQuestionOption[] = [];
-  for (const item of value) {
-    if (item && typeof item === "object" && !Array.isArray(item)) {
-      const rec = item as Record<string, unknown>;
-      if (typeof rec.id === "string" && typeof rec.text === "string") {
-        out.push({
-          id: rec.id,
-          text: rec.text,
-          imageUrl: typeof rec.imageUrl === "string" ? rec.imageUrl : null,
-        });
-      }
-    }
-  }
-  return out;
-}
-
-function parseStringArray(value: Prisma.JsonValue): string[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter((v): v is string => typeof v === "string");
-}
 
 function optionsToJson(
   options: AssessmentQuestionInput["options"],
@@ -95,8 +76,8 @@ function toAdminQuestion(q: QuestionRow): AdminQuestion {
     type: q.type,
     questionText: q.questionText,
     imageUrl: q.imageUrl,
-    options: parseOptions(q.options),
-    correctAnswers: parseStringArray(q.correctAnswers),
+    options: parseQuestionOptions(q.options),
+    correctAnswers: parseJsonStringArray(q.correctAnswers),
     points: q.points,
     orderIndex: q.orderIndex,
   };
@@ -548,7 +529,7 @@ function toAdminInterviewQuestion(
     id: q.id,
     questionText: q.questionText,
     questionType: q.questionType,
-    expectedKeywords: parseStringArray(q.expectedKeywords),
+    expectedKeywords: parseJsonStringArray(q.expectedKeywords),
     maxTimeSeconds: q.maxTimeSeconds,
     orderIndex: q.orderIndex,
   };

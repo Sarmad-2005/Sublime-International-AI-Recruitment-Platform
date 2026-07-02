@@ -17,6 +17,10 @@ import {
   aiInterviewInviteEmail,
 } from "@/lib/email";
 import { absoluteUrl } from "@/lib/utils/url";
+import {
+  parseQuestionOptions,
+  parseJsonStringArray,
+} from "@/lib/utils/questionJson";
 import type { QuestionType } from "@/generated/prisma/enums";
 import type {
   AssessmentCategoryBreakdown,
@@ -57,41 +61,6 @@ export class AssessmentError extends Error {
     super(message);
     this.name = "AssessmentError";
   }
-}
-
-// ---------------------------------------------------------------------------
-// JSON parsing — `options` / `correctAnswers` are stored as opaque JSON.
-// ---------------------------------------------------------------------------
-
-interface RawOption {
-  id: string;
-  text: string;
-  imageUrl: string | null;
-}
-
-function parseOptions(value: Prisma.JsonValue): RawOption[] {
-  if (!Array.isArray(value)) return [];
-  const out: RawOption[] = [];
-  for (const item of value) {
-    if (item && typeof item === "object" && !Array.isArray(item)) {
-      const record = item as Record<string, unknown>;
-      const id = record.id;
-      const text = record.text;
-      if (typeof id === "string" && typeof text === "string") {
-        out.push({
-          id,
-          text,
-          imageUrl: typeof record.imageUrl === "string" ? record.imageUrl : null,
-        });
-      }
-    }
-  }
-  return out;
-}
-
-function parseStringArray(value: Prisma.JsonValue): string[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter((v): v is string => typeof v === "string");
 }
 
 // ---------------------------------------------------------------------------
@@ -149,7 +118,7 @@ function toCandidateQuestion(
   question: AssessmentRow["questions"][number],
   shuffleAnswers: boolean,
 ): AssessmentQuestionDTO {
-  const options = parseOptions(question.options);
+  const options = parseQuestionOptions(question.options);
   const ordered = shuffleAnswers ? shuffled(options) : options;
   const safeOptions: AssessmentOptionDTO[] = ordered.map((o) => ({
     id: o.id,
@@ -209,7 +178,7 @@ function computeScore(
 
   for (const q of questions) {
     totalPoints += q.points;
-    const correctAnswers = parseStringArray(q.correctAnswers);
+    const correctAnswers = parseJsonStringArray(q.correctAnswers);
     const selected = answers[q.id] ?? [];
     const ok = isCorrect(q.type, correctAnswers, selected);
 

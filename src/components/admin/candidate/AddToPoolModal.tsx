@@ -15,7 +15,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { addCandidateToPoolAction } from "@/app/(admin)/admin/candidates/actions";
 import type { SaudiClientSummary } from "@/types";
 

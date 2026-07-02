@@ -4,14 +4,12 @@ import { notFound, redirect } from "next/navigation";
 import { ChevronLeft, ExternalLink } from "lucide-react";
 
 import { authService, questionBankService } from "@/lib/services";
-import { ROUTES, USER_ROLES } from "@/lib/constants";
+import { ROUTES, ADMIN_ROLES } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { BankSettingsForm } from "../_components/BankSettingsForm";
 import { QuestionListEditor } from "../_components/QuestionListEditor";
 
 export const metadata: Metadata = { title: "Question Bank — SIORP Admin" };
-
-const ADMIN_ROLES: readonly string[] = [USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN];
 
 export default async function QuestionBankEditorPage({
   params,

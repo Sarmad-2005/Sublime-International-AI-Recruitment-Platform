@@ -16,15 +16,13 @@ import {
 } from "lucide-react";
 
 import { authService, jobPostService } from "@/lib/services";
-import { ROUTES, USER_ROLES, JOB_SECTOR_LABELS, JOB_BENEFIT_LABELS, type JobBenefit } from "@/lib/constants";
+import { ROUTES, ADMIN_ROLES, JOB_SECTOR_LABELS, JOB_BENEFIT_LABELS, type JobBenefit } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ApplicationFunnelMini } from "@/components/admin/jobs";
 import { JobStatusActions } from "./_components/JobStatusActions";
 import type { JobPostStatus } from "@/lib/constants";
-
-const ADMIN_ROLES: readonly string[] = [USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN];
 
 interface PageProps {
   params: Promise<{ jobId: string }>;

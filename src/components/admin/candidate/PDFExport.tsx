@@ -10,7 +10,6 @@ import {
   View,
   Text,
   StyleSheet,
-  Font,
 } from "@react-pdf/renderer";
 
 import { Button } from "@/components/ui/button";

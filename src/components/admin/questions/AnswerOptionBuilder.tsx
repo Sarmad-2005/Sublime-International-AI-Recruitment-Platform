@@ -9,6 +9,7 @@ import {
   SINGLE_ANSWER_QUESTION_TYPES,
   type QuestionTypeValue,
 } from "@/lib/constants";
+import { randomId } from "@/lib/utils/id";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ImageUpload } from "./ImageUpload";
@@ -23,13 +24,6 @@ interface AnswerOptionBuilderProps {
   /** Show a per-option image slot (image-based questions). */
   withImages?: boolean;
   disabled?: boolean;
-}
-
-function newOptionId(): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
-  }
-  return `opt-${Math.random().toString(36).slice(2)}-${Date.now()}`;
 }
 
 /**
@@ -56,7 +50,7 @@ export function AnswerOptionBuilder({
 
   function addOption() {
     if (options.length >= MAX_ANSWER_OPTIONS) return;
-    onOptionsChange([...options, { id: newOptionId(), text: "", imageUrl: null }]);
+    onOptionsChange([...options, { id: randomId("opt"), text: "", imageUrl: null }]);
   }
 
   function removeOption(id: string) {

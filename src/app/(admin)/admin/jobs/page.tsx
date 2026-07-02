@@ -4,14 +4,12 @@ import { redirect } from "next/navigation";
 import { Plus } from "lucide-react";
 
 import { authService, jobPostService } from "@/lib/services";
-import { ROUTES, USER_ROLES, JOBS_PAGE_SIZE, type JobPostStatus } from "@/lib/constants";
+import { ROUTES, ADMIN_ROLES, JOBS_PAGE_SIZE, type JobPostStatus } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { JobsTable } from "./_components/JobsTable";
 import { JobsFiltersBar } from "./_components/JobsFiltersBar";
 
 export const metadata: Metadata = { title: "Job Posts — SIORP Admin" };
-
-const ADMIN_ROLES: readonly string[] = [USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN];
 
 interface PageSearchParams {
   status?: string;

@@ -9,7 +9,6 @@ import { ShieldAlert } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   CANDIDATE_TIER_LABELS,
-  CANDIDATE_TIERS,
   type CandidateTier,
 } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
